@@ -53,8 +53,8 @@ public class RedAuto extends LinearOpMode {
     Servo fr, br, fl, bl, outtakeServo, intakePosition;
     public static int outtakeFirstLevelPosition = -120;
     public static double outtakePower = 0.5;
-    public static double outtakeServoClosePosition = 0.9;
-    public static double outtakeServoOpenPosition = 0.4;
+    public static double outtakeServoClosePosition = 0.2;
+    public static double outtakeServoOpenPosition = 0.7;
     public static int outtakeDownPosition = 0;
 
     enum State {

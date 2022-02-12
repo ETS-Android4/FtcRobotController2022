@@ -20,20 +20,20 @@ public class CVPipeline extends OpenCvPipeline {
     public static final Point RED_REGION1_B = new Point(215, 50);
 
     //blue
-    public static final Point RED_REGION2_A = new Point(215, 90);
-    public static final Point RED_REGION2_B = new Point(230, 110);
+    public static final Point RED_REGION2_A = new Point(245, 20);
+    public static final Point RED_REGION2_B = new Point(260, 40);
 
     //green
-    public static final Point RED_REGION3_A = new Point(240, 160);
-    public static final Point RED_REGION3_B = new Point(260, 180);
+    public static final Point RED_REGION3_A = new Point(270, 160);
+    public static final Point RED_REGION3_B = new Point(290, 180);
 
     //red
-    public static final Point BLUE_REGION1_A = new Point(205, 40);
-    public static final Point BLUE_REGION1_B = new Point(215, 50);
+    public static final Point BLUE_REGION1_A = new Point(250, 160);
+    public static final Point BLUE_REGION1_B = new Point(280, 180);
 
     //blue
-    public static final Point BLUE_REGION2_A = new Point(215, 90);
-    public static final Point BLUE_REGION2_B = new Point(230, 110);
+    public static final Point BLUE_REGION2_A = new Point(295, 20);
+    public static final Point BLUE_REGION2_B = new Point(310, 40);
 
     //green
     public static final Point BLUE_REGION3_A = new Point(240, 160);
@@ -204,14 +204,24 @@ public class CVPipeline extends OpenCvPipeline {
 
 
 
-        int minAvg = Math.min(avg1, Math.min(avg2, avg3));
-        if (minAvg == avg1) {
-            position = 1;
-        } else if (minAvg == avg2) {
-            position = 2;
-        } else if (minAvg == avg3) {
-            position = 3;
+        if (isRed) {
+            if (avg2 < 100) {
+                position = 2;
+            } else if (avg3 < 100) {
+                position = 1;
+            } else {
+                position = 3;
+            }
+        } else {
+            if (avg2 > 120) {
+                position = 1;
+            } else if (avg1 > 120) {
+                position = 2;
+            } else {
+                position = 3;
+            }
         }
+
 
         /*
          * Render the 'input' buffer to the viewport. But note this is not

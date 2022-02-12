@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.drive.PoseStorage;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
@@ -33,8 +34,8 @@ public class MainTeleOp extends LinearOpMode {
     public static int outtakeFirstLevelPosition = -120;
     public static int outtakeDownPosition = 0;
     public static double outtakePower = 0.5;
-    public static double outtakeServoClosePosition = 0.6;
-    public static double outtakeServoOpenPosition = 0.4;
+    public static double outtakeServoClosePosition = 0.2;
+    public static double outtakeServoOpenPosition = 0.7;
 
     public static double intakeExtensionLowerLimit = -30;
     public static double intakeExtensionUpperLimit = 270;
@@ -49,6 +50,7 @@ public class MainTeleOp extends LinearOpMode {
     public static double TICKS_PER_REV = 537.6;
 
     public static boolean isMec = true;
+    ElapsedTime runtime = new ElapsedTime();
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -57,6 +59,8 @@ public class MainTeleOp extends LinearOpMode {
         int startpoint = 0;
         double power = 0.0;
         double scale = 0.0;
+        double lastX = runtime.seconds();
+        double lastB = runtime.seconds();
 
         SampleMecanumDrive mecDrive = new SampleMecanumDrive(hardwareMap);
         mecDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -130,6 +134,8 @@ public class MainTeleOp extends LinearOpMode {
         waitForStart();
 
         while (!isStopRequested()) {
+            double elapsed = runtime.seconds() - time;
+
             mecDrive.update();
             tankDrive.update();
 
@@ -182,29 +188,59 @@ public class MainTeleOp extends LinearOpMode {
             }
 
             // carousel
+//            if (gamepad2.x) {
+//                if (carousel.getCurrentPosition() <= TICKS_PER_REV * 2 / 3 * 6) {
+//                    carousel.setPower(0.6);
+//                } else {
+//                    carousel.setPower(1);
+//                }
+//            }
+//            if (gamepad2.b) {
+//                if (carousel.getCurrentPosition() <= -(TICKS_PER_REV * 2 / 3 * 6)) {
+//                    carousel.setPower(-0.6);
+//                } else {
+//                    carousel.setPower(-1);
+//                }
+//            }
+
+            boolean noCarousel = true;
             if (gamepad2.x) {
-                if (carousel.getCurrentPosition() <= TICKS_PER_REV * 2 / 3 * 6) {
+                noCarousel = false;
+                if (runtime.seconds() - lastX < 1.5) {
                     carousel.setPower(0.6);
                 } else {
                     carousel.setPower(1);
                 }
+            } else {
+                lastX = runtime.seconds();
             }
+
             if (gamepad2.b) {
-                if (carousel.getCurrentPosition() <= -(TICKS_PER_REV * 2 / 3 * 6)) {
+                noCarousel = false;
+                if (runtime.seconds() - lastB < 1.5) {
                     carousel.setPower(-0.6);
                 } else {
                     carousel.setPower(-1);
                 }
+            } else {
+                lastB = runtime.seconds();
             }
 
-            double state = 0;
-            if(gamepad2.x){
-                state++;
-            }
-            if(gamepad2.b){
-                state--;
-            }
-            carousel.setPower(0.6 * state);
+            if (noCarousel) carousel.setPower(0);
+
+//            double state = 0;
+//            if(gamepad2.x){
+//                state=Math.min(1,state+1);
+//            }
+//            if(gamepad2.b){
+//                state=Math.max(-1,state-1);
+//            }
+//
+//            if (elapsed < 1.5) {
+//                carousel.setPower(0.8 * state);
+//            } else {
+//                carousel.setPower(1 * state);
+//            }
 //            if (redCarousel.isDown()) {
 //                carousel.setPower(-1);
 //            } else {

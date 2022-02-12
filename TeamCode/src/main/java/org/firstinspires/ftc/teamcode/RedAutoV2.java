@@ -45,23 +45,6 @@ public class RedAutoV2 extends LinearOpMode {
     LinearOpMode op;
 
     Pose2d startingPosition = new Pose2d(-59, -56, ((Math.PI/2) - Math.atan(7 / 17)));
-    Vector2d carouselPos = new Vector2d(-60, -56);
-    //Pose2d shippingHubPose = new Pose2d(-39,-25, Math.toRadians(226));
-
-    Vector2d shippingHubPose = new Vector2d(-24,-36.5); //220.43
-
-    //Pose2d allianceFreightPose = new Pose2d(-12,-53, -Math.atan(8 / 16)); // account for drift!!
-    Vector2d allianceFreightPose = new Vector2d(-12,-53); // account for drift!!
-    //    Pose2d checkpt1 = new Pose2d(2,-41+20, Math.toRadians(55));
-    Vector2d scoreAllianceFreight = new Vector2d(-22, -42.5);
-    Pose2d teammateItem1 = new Pose2d(-28,-49, Math.toRadians(30));
-    Vector2d checkpt0 = new Vector2d(-18,-50);
-    Vector2d checkpt00 = new Vector2d(-9,-50);
-    Pose2d checkpt000 = new Pose2d(-3 ,-41, Math.toRadians(65));
-
-    Vector2d storageUnitPose = new Vector2d(-48, -36);
-    Pose2d wareHousePos = new Pose2d(48, -48, Math.toRadians(0));
-    Vector2d switchingPos = new Vector2d(0, -48);
 
     Trajectory goToShippingHubFromCarousel2, goToTeammateItemFromShippingHub,
             goToShippingHubFromAlliance, goToCarouselFromStarting, goToShippingHubFromCarousel,
@@ -74,8 +57,8 @@ public class RedAutoV2 extends LinearOpMode {
     Servo fr, br, fl, bl, outtakeServo, intakePosition;
 
     public static double outtakePower = 0.5;
-    public static double outtakeServoClosePosition = 0.6;
-    public static double outtakeServoOpenPosition = 0.4;
+    public static double outtakeServoClosePosition = 0.2;
+    public static double outtakeServoOpenPosition = 0.7;
     public static int outtakeDownPosition = 0;
 
     public static boolean isMec = false;
@@ -134,14 +117,14 @@ public class RedAutoV2 extends LinearOpMode {
                 //.lineToSplineHeading(shippingHubPose)
                 //.lineTo(new Vector2d(shippingHubPose.getX(),shippingHubPose.getY()))
                 //.lineTo(new Vector2d(shippingHubPose.getX(), shippingHubPose.getY()))
-                .back(14)
+                .back(16)
                 .build();
 
         goToAllianceFreightFromShippingHub = tankDrive.trajectoryBuilder(goToShippingHubFromCarousel2.end())
                 .forward(6)
                 .build();
 
-        goToAllianceFreightFromShippingHub2 = tankDrive.trajectoryBuilder(goToAllianceFreightFromShippingHub.end().plus(new Pose2d(0, 0, Math.toRadians(127))))
+        goToAllianceFreightFromShippingHub2 = tankDrive.trajectoryBuilder(goToAllianceFreightFromShippingHub.end().plus(new Pose2d(0, 0, Math.toRadians(114))))
                 .forward(32)
                 .build();
 
@@ -184,7 +167,7 @@ public class RedAutoV2 extends LinearOpMode {
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam"), cameraMonitorViewId);
-        pipeline = new CVPipeline(false);
+        pipeline = new CVPipeline(true);
         webcam.setPipeline(pipeline);
         webcam.setMillisecondsPermissionTimeout(2500);
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
@@ -215,6 +198,7 @@ public class RedAutoV2 extends LinearOpMode {
         outtake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         outtakeServo = hardwareMap.get(Servo.class, "outtake servo");
+        outtakeServo.setDirection(Servo.Direction.REVERSE);
         intakePosition = hardwareMap.get(Servo.class, "intakeLift");
         fl = hardwareMap.get(Servo.class, "frontleft");
         // limits: 0.98 & 0
@@ -241,6 +225,8 @@ public class RedAutoV2 extends LinearOpMode {
         intakeSurgical.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         intakeSurgical.setDirection(DcMotor.Direction.FORWARD);
         intakeSurgical.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        outtakeServo.setPosition(outtakeServoClosePosition);
+
         buildTrajectories();
 
         runtime.reset();
@@ -260,6 +246,7 @@ public class RedAutoV2 extends LinearOpMode {
         waitForStart();
         mecanumDrive.turnAsync(Math.toRadians(10));
         next(State.KNOCK_OFF_DUCK);
+//        next(State.GO_TO_SHIPPING_HUB_2);
 //        next(State.INTAKE_ALLIANCE);
 
         while(opModeIsActive()) {
@@ -329,10 +316,15 @@ public class RedAutoV2 extends LinearOpMode {
                     break;
                 case SCORE_FREIGHT_IN_SHIPPING_HUB:
                     if (!tankDrive.isBusy()) {
-                        if (elapsed < 0.8) {
+                        if (elapsed < 0.2) {
+                            switchFromTankToMec();
+                        } else if (elapsed < 0.4) {
                             outtakeServo.setPosition(outtakeServoOpenPosition);
                             telemetry.addData("outtake servo position: ", outtakeServo.getPosition());
-                        } else if (elapsed < 1.6) {
+                        } else if (elapsed < 1) {
+                            switchFromMecToTank();
+//                            tankDrive.followTrajectory(tankDrive.trajectoryBuilder(PoseStorage.currentPose).back(1).build());
+                        } else if (elapsed < 1.8) {
                             outtakeServo.setPosition(outtakeServoClosePosition);
                             outtake.setTargetPosition(outtakeDownPosition);
                             outtake.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -347,7 +339,7 @@ public class RedAutoV2 extends LinearOpMode {
                     if (!tankDrive.isBusy()) {
                         switchFromTankToMec();
                         sleep(200);;
-                        mecanumDrive.turn(Math.toRadians(127));
+                        mecanumDrive.turn(Math.toRadians(114));
                         switchFromMecToTank();
                         sleep(200);;
                         tankDrive.followTrajectoryAsync(goToAllianceFreightFromShippingHub2);
@@ -407,8 +399,12 @@ public class RedAutoV2 extends LinearOpMode {
                     if (!tankDrive.isBusy()) {
                         if (elapsed < 0.8) {
                             switchFromTankToMec();
+                        } else if (elapsed < 1) {
                             outtakeServo.setPosition(outtakeServoOpenPosition);
                             telemetry.addData("outtake servo position: ", outtakeServo.getPosition());
+                        } else if (elapsed < 1.6) {
+                            // TODO switch
+                            tankDrive.followTrajectory(tankDrive.trajectoryBuilder(PoseStorage.currentPose).back(1).build());
                         } else if (elapsed < 2.3) {
                             outtakeServo.setPosition(outtakeServoClosePosition);
                             outtake.setTargetPosition(outtakeDownPosition);
