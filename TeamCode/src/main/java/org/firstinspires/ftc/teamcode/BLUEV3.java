@@ -6,7 +6,6 @@ import static org.firstinspires.ftc.teamcode.ServoConstants.outtakeThirdLevelPos
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -25,8 +24,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 @Config
-@Autonomous(name = "RedAutoV2")
-public class RedAutoV2 extends LinearOpMode {
+@Autonomous(name = "BlueAutoV3")
+public class BLUEV3 extends LinearOpMode {
     OpenCvWebcam webcam;
     CVPipeline pipeline;
 
@@ -39,7 +38,7 @@ public class RedAutoV2 extends LinearOpMode {
     double tankDown = 0.85;
     double time = 0.0;
     double intakeUp = 0.15;
-    int position = 3;
+    int position = 1;
     ElapsedTime runtime = new ElapsedTime();
     State currentState = State.IDLE;
     LinearOpMode op;
@@ -113,11 +112,11 @@ public class RedAutoV2 extends LinearOpMode {
                 .forward(27.586228)
                 .build();
 
-        goToShippingHubFromCarousel2 = tankDrive.trajectoryBuilder(goToShippingHubFromCarousel.end().plus(new Pose2d(0, 0, Math.toRadians(135))))
+        goToShippingHubFromCarousel2 = tankDrive.trajectoryBuilder(goToShippingHubFromCarousel.end().plus(new Pose2d(0, 0, Math.toRadians(125))))
                 //.lineToSplineHeading(shippingHubPose)
                 //.lineTo(new Vector2d(shippingHubPose.getX(),shippingHubPose.getY()))
                 //.lineTo(new Vector2d(shippingHubPose.getX(), shippingHubPose.getY()))
-                .back(9)
+                .back(16)
                 .build();
 
         parkWarehouse = tankDrive.trajectoryBuilder(goToShippingHubFromCarousel2.end())
@@ -242,10 +241,10 @@ public class RedAutoV2 extends LinearOpMode {
             telemetry.addData("avg1 - red", pipeline.getAvg1());
             telemetry.addData("avg2 - blue", pipeline.getAvg2());
             telemetry.addData("avg3 - green", pipeline.getAvg3());
+            telemetry.addData("position", pipeline.getPosition());
             telemetry.update();
 
             position = pipeline.getPosition();
-            telemetry.addData("position", position);
             mecanumDrive.setPoseEstimate(startingPosition);
         }
 
@@ -261,28 +260,9 @@ public class RedAutoV2 extends LinearOpMode {
             double elapsed = runtime.seconds() - time;
             switch (currentState) {
                 case KNOCK_OFF_DUCK:
-                    if (elapsed < 2.5) {
-                        // should spin for 4 seconds
-                        if (elapsed < 1.5) {
-                            carousel.setPower(-0.6);
-                        } else {
-                            carousel.setPower(-1);
-                        }
-                        fleft.setPower(-0.1);
-                        fright.setPower(-0.1);
-                        bleft.setPower(-0.1);
-                        bright.setPower(-0.1);
-                    } else {
-                        carousel.setPower(0.0);
-                        fleft.setPower(0.0);
-                        fright.setPower(0.0);
-                        bleft.setPower(0.0);
-                        bright.setPower(0.0);
-                    }
-                    if (!mecanumDrive.isBusy() && elapsed >= 3.5) {
-                        tankDrive.followTrajectoryAsync(goToShippingHubFromCarousel);
-                        next(State.GO_TO_SHIPPING_HUB);
-                    }
+
+                    next(State.GO_TO_SHIPPING_HUB);
+
                     break;
                 case GO_TO_SHIPPING_HUB:
                     // path to go to shipping hub
@@ -294,7 +274,7 @@ public class RedAutoV2 extends LinearOpMode {
                     if (!tankDrive.isBusy()) {
                         switchFromTankToMec();
                         sleep(200);;
-                        mecanumDrive.turn(Math.toRadians(135));
+                        mecanumDrive.turn(-Math.toRadians(125));
                         switchFromMecToTank();
                         sleep(200);;
                         next(State.GO_TO_SHIPPING_HUB_2);

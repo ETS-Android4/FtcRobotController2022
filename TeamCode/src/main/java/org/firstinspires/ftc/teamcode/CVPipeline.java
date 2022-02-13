@@ -32,8 +32,8 @@ public class CVPipeline extends OpenCvPipeline {
     public static final Point BLUE_REGION1_B = new Point(280, 180);
 
     //blue
-    public static final Point BLUE_REGION2_A = new Point(295, 20);
-    public static final Point BLUE_REGION2_B = new Point(310, 40);
+    public static final Point BLUE_REGION2_A = new Point(225, 60);
+    public static final Point BLUE_REGION2_B = new Point(240, 80);
 
     //green
     public static final Point BLUE_REGION3_A = new Point(240, 160);

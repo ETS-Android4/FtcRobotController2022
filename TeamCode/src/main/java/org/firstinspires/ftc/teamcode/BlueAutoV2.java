@@ -160,7 +160,7 @@ public class BlueAutoV2 extends LinearOpMode {
         fl.setPosition(0.984);
         fr.setPosition(0.1);
         br.setPosition(0.955);
-        bl.setPosition(0.045);
+        bl.setPosition(0.01);
         isMec = true;
     }
 
