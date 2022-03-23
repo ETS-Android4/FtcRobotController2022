@@ -23,7 +23,8 @@ import org.firstinspires.ftc.teamcode.drive.SampleTankDrive;
 @Config
 public class MainTeleOp extends LinearOpMode {
 
-    DcMotorEx intakeSurgical, intakeExtension, outtake, motorExLeft, carousel;
+    DcMotorEx intakeSurgical, intakeExtension, outtake, motorExLeft, carousel,
+                fleft, fright, bleft, bright;
     Servo intakePosition, outtakeServo, fr, br, fl, bl;
 
     double mecDown = 0.92;
@@ -78,6 +79,11 @@ public class MainTeleOp extends LinearOpMode {
         fr = hardwareMap.get(Servo.class, "frontright"); // lower: .1, upper: 1
         br = hardwareMap.get(Servo.class, "backright"); // lower: 0.954, upper: 0
         bl = hardwareMap.get(Servo.class, "backleft"); // lower: 0.02, upper: 1
+
+        fleft = hardwareMap.get(DcMotorEx.class, "front_left");
+        fright = hardwareMap.get(DcMotorEx.class, "front_right");
+        bleft = hardwareMap.get(DcMotorEx.class, "rear_left");
+        bright = hardwareMap.get(DcMotorEx.class, "rear_right");
 
         motorExLeft = (DcMotorEx)hardwareMap.get(DcMotor.class, "intake");
         outtakeServo = hardwareMap.get(Servo.class, "outtake servo");
@@ -204,10 +210,17 @@ public class MainTeleOp extends LinearOpMode {
 //            }
 
             boolean noCarousel = true;
+            if (gamepad2.x || gamepad2.b) {
+                fleft.setPower(-0.07);
+                fright.setPower(-0.07);
+                bleft.setPower(-0.07);
+                bright.setPower(-0.07);
+            }
+
             if (gamepad2.x) {
                 noCarousel = false;
                 if (runtime.seconds() - lastX < 1.5) {
-                    carousel.setPower(0.6);
+                    carousel.setPower(0.1);
                 } else {
                     carousel.setPower(1);
                 }
@@ -218,7 +231,7 @@ public class MainTeleOp extends LinearOpMode {
             if (gamepad2.b) {
                 noCarousel = false;
                 if (runtime.seconds() - lastB < 1.5) {
-                    carousel.setPower(-0.6);
+                    carousel.setPower(-1);
                 } else {
                     carousel.setPower(-1);
                 }

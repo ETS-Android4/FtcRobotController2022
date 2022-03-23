@@ -16,7 +16,8 @@ public class LimitTest extends LinearOpMode {
 //        motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 //        motor.setDirection(DcMotor.Direction.REVERSE);
 //        motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        Servo intakePosition = hardwareMap.get(Servo.class, "intakeLift");
+        Servo bl = hardwareMap.get(Servo.class, "outtake servo"); // limits: 0.015 and 1
+        //intakePosition = hardwareMap.get(Servo.class, "intakeLift");
 
 
         //Servo s = hardwareMap.get(Servo.class, "stick");
@@ -32,7 +33,7 @@ public class LimitTest extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            intakePosition.setPosition(servoPos);
+            bl.setPosition(servoPos);
             //s.setPosition(servoPower);
             //fl.setPosition(0.0);
 
@@ -44,7 +45,6 @@ public class LimitTest extends LinearOpMode {
 //            }
 
             //telemetry.addData("position",motor.getCurrentPosition());
-            telemetry.addData("position",intakePosition.getPosition());
             telemetry.update();
         }
     }
