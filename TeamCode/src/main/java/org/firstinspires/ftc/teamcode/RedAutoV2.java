@@ -113,15 +113,15 @@ public class RedAutoV2 extends LinearOpMode {
                 .forward(27.586228)
                 .build();
 
-        goToShippingHubFromCarousel2 = tankDrive.trajectoryBuilder(goToShippingHubFromCarousel.end().plus(new Pose2d(0, 0, Math.toRadians(135))))
+        goToShippingHubFromCarousel2 = tankDrive.trajectoryBuilder(goToShippingHubFromCarousel.end())
                 //.lineToSplineHeading(shippingHubPose)
                 //.lineTo(new Vector2d(shippingHubPose.getX(),shippingHubPose.getY()))
                 //.lineTo(new Vector2d(shippingHubPose.getX(), shippingHubPose.getY()))
-                .back(9)
+                .back(16)
                 .build();
 
         parkWarehouse = tankDrive.trajectoryBuilder(goToShippingHubFromCarousel2.end())
-                .forward(32)
+                .forward(25)
                 .build();
 
 
@@ -129,6 +129,7 @@ public class RedAutoV2 extends LinearOpMode {
                 .forward(6)
                 .build();
 
+        // none of the below trajectories used
         goToAllianceFreightFromShippingHub2 = tankDrive.trajectoryBuilder(goToAllianceFreightFromShippingHub.end().plus(new Pose2d(0, 0, Math.toRadians(114))))
                 .forward(30)
                 .build();
@@ -145,9 +146,9 @@ public class RedAutoV2 extends LinearOpMode {
                 .forward(6)
                 .build();
 
-        park2 = tankDrive.trajectoryBuilder(park1.end().plus(new Pose2d(0, 0, Math.toRadians(80))))
-                .forward(72)
-                .build();
+//        park2 = tankDrive.trajectoryBuilder(park1.end().plus(new Pose2d(0, 0, Math.toRadians(80))))
+//                .forward(72)
+//                .build();
 
 
     }
@@ -294,7 +295,7 @@ public class RedAutoV2 extends LinearOpMode {
                     if (!tankDrive.isBusy()) {
                         switchFromTankToMec();
                         sleep(200);;
-                        mecanumDrive.turn(Math.toRadians(135));
+                        mecanumDrive.turn(Math.toRadians(135-10));
                         switchFromMecToTank();
                         sleep(200);;
                         next(State.GO_TO_SHIPPING_HUB_2);
@@ -463,6 +464,10 @@ public class RedAutoV2 extends LinearOpMode {
             telemetry.addData("heading", poseEstimate.getHeading());
             telemetry.addData("state", currentState);
             telemetry.addData("MODE", isMec);
+            telemetry.addData("fr power: ", fright.getPower());
+            telemetry.addData("fl power: ", fleft.getPower());
+            telemetry.addData("br power: ", bright.getPower());
+            telemetry.addData("bl power: ", bleft.getPower());
             //telemetry.addData("elapsed", elapsed);
 //            telemetry.addData("push", push);
             telemetry.update();
