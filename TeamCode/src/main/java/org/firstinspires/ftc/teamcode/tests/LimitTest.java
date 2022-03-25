@@ -3,13 +3,13 @@ package org.firstinspires.ftc.teamcode.tests;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name = "Limit Test")
 @Config
 public class LimitTest extends LinearOpMode {
-    public static double servoPos = 0.05;
-
     @Override
     public void runOpMode() throws InterruptedException {
 //        DcMotorEx motor = hardwareMap.get(DcMotorEx.class, "intake");
@@ -18,7 +18,17 @@ public class LimitTest extends LinearOpMode {
 //        motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Servo bl = hardwareMap.get(Servo.class, "outtake servo"); // limits: 0.015 and 1
         //intakePosition = hardwareMap.get(Servo.class, "intakeLift");
+        DcMotorEx intakeExtension = hardwareMap.get(DcMotorEx.class, "intakeExtension");
+        intakeExtension.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        intakeExtension.setDirection(DcMotor.Direction.REVERSE);
 
+        intakeExtension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+
+        DcMotorEx outtake = hardwareMap.get(DcMotorEx.class, "intake");
+        outtake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        outtake.setDirection(DcMotor.Direction.REVERSE);
+        outtake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         //Servo s = hardwareMap.get(Servo.class, "stick");
         //Servo s = hardwareMap.get(Servo.class, "stopper");
@@ -33,7 +43,15 @@ public class LimitTest extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            bl.setPosition(servoPos);
+            //bl.setPosition(servoPos);
+            intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            intakeExtension.setTargetPosition(100);
+            intakeExtension.setPower(0.5);
+            telemetry.addData("pos: ", intakeExtension.getCurrentPosition());
+            outtake.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            outtake.setTargetPosition(-120);
+            outtake.setPower(0.5);
+
             //s.setPosition(servoPower);
             //fl.setPosition(0.0);
 

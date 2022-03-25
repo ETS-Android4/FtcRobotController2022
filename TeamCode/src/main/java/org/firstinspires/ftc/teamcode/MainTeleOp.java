@@ -87,7 +87,7 @@ public class MainTeleOp extends LinearOpMode {
 
         motorExLeft = (DcMotorEx)hardwareMap.get(DcMotor.class, "intake");
         outtakeServo = hardwareMap.get(Servo.class, "outtake servo");
-        outtakeServo.setDirection(Servo.Direction.REVERSE);
+        outtakeServo.setDirection(Servo.Direction.FORWARD);
 
 
         intakeSurgical = hardwareMap.get(DcMotorEx.class, "intakeSurgical");

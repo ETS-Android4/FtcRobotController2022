@@ -9,13 +9,13 @@ import com.qualcomm.robotcore.hardware.Servo;
 @Config
 public class DriveServoLimits extends LinearOpMode {
 
-    public static double flMec = 0.98;
+    public static double flMec = 0.992;
     public static double flTank = 0;
 
     public static double brMec = 0.98;
     public static double brTank = 0;
 
-    public static double frMec = 0.0175;
+    public static double frMec = 0.1;
     public static double frTank = 1;
 
     public static double blMec = 0.034;
@@ -35,20 +35,18 @@ public class DriveServoLimits extends LinearOpMode {
         Servo bl = hardwareMap.get(Servo.class, "backleft");
         waitForStart();
         while (opModeIsActive()){
-            if(meow){
-        if (isMec) {
-            fl.setPosition(flMec);
-            br.setPosition(blMec);
-            fr.setPosition(frMec);
-            bl.setPosition(blMec);
-        } else {
-            fl.setPosition(flTank);
-            br.setPosition(blTank);
-            fr.setPosition(frTank);
-            bl.setPosition(blTank);
-        }
-        meow=false;
+            if (isMec) {
+                fl.setPosition(flMec);
+                br.setPosition(brMec);
+                fr.setPosition(frMec);
+                bl.setPosition(blMec);
+            } else {
+                fl.setPosition(flTank);
+                br.setPosition(brTank);
+                fr.setPosition(frTank);
+                bl.setPosition(blTank);
             }
+
         }
     }
 }
