@@ -87,8 +87,8 @@ public class MecanumDriveConstants {
 
      */
 
-    public static double MAX_VEL = 50.0;// 47.907;
-    public static double MAX_ACCEL = 12;// 52.48180821614297;
+    public static double MAX_VEL = 50.0 * 1/2;// 47.907;
+    public static double MAX_ACCEL = 12 * 1/2;// 52.48180821614297;
     public static double MAX_ANG_VEL = 2 * Math.PI;//Math.toRadians(360); // Math.toRadians(33.74084763191785);
     public static double MAX_ANG_ACCEL = 2 * Math.PI; //Math.toRadians(360); //Math.toRadians(184.02607784577722);
 
