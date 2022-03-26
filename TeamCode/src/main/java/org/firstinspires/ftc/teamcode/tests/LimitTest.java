@@ -44,13 +44,13 @@ public class LimitTest extends LinearOpMode {
 
         while (opModeIsActive()) {
             //bl.setPosition(servoPos);
-            intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            intakeExtension.setTargetPosition(100);
-            intakeExtension.setPower(0.5);
+//            intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//            intakeExtension.setTargetPosition(100);
+//            intakeExtension.setPower(0.5);
             telemetry.addData("pos: ", intakeExtension.getCurrentPosition());
-            outtake.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            outtake.setTargetPosition(-120);
-            outtake.setPower(0.5);
+//            outtake.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//            outtake.setTargetPosition(-120);
+//            outtake.setPower(0.5);
 
             //s.setPosition(servoPower);
             //fl.setPosition(0.0);
