@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import static org.firstinspires.ftc.teamcode.ServoConstants.*;
+import static org.firstinspires.ftc.teamcode.ServoConstants.outtakeFirstLevelPosition;
+import static org.firstinspires.ftc.teamcode.ServoConstants.outtakePower;
+import static org.firstinspires.ftc.teamcode.ServoConstants.outtakeThirdLevelPosition;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -37,10 +40,10 @@ public class MainTeleOp extends LinearOpMode {
     public static int outtakeFirstLevelPosition = -120;
     public static int outtakeDownPosition = 0;
     public static double outtakePower = 0.5;
-    public static double outtakeServoClosePosition = 0.2;
-    public static double outtakeServoOpenPosition = 0.7;
+//    public static double outtakeServoClosePosition = 0.2;
+//    public static double outtakeServoOpenPosition = 0.7;
 
-    public static int intakeExtensionLowerLimit = -30;
+    public static int intakeExtensionLowerLimit = -70;
     public static int intakeExtensionUpperLimit = 270;
     public static double intakePower = 0.6;
 
@@ -124,7 +127,7 @@ public class MainTeleOp extends LinearOpMode {
         intakeExtensionUpperLimit = intakeExtensionLowerLimit + 270;
         intakePosition.setPosition(intakeUp);
         motorExLeft.setTargetPosition(outtakeDownPosition);
-        outtakeServo.setPosition(outtakeServoClosePosition);
+        outtakeServo.setPosition(outtakeServoLowerLimit);
 
         double scaler = 0.6;
 
@@ -315,18 +318,18 @@ public class MainTeleOp extends LinearOpMode {
                 double joystickPosition = gamepad2.left_stick_y;
                 telemetry.addData("curr pos: ", intakeExtension.getCurrentPosition());
                 telemetry.addData("statement: ", intakeExtension.getCurrentPosition() > intakeExtensionLowerLimit);
-                if (intakeExtension.getCurrentPosition() > -30) {
+                if (intakeExtension.getCurrentPosition() > -70) {
 //                    telemetry.addData("statement: ", gamepad2.left_stick_y < -0.1);
 //                    telemetry.addData("pos: ", (int) (joystickPosition * 270 * (-1)));
 //
-
+                    telemetry.addData("test", 0);
                     intakeExtension.setTargetPosition((int) (joystickPosition * 270 * (-1)));
                     intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     intakeExtension.setPower(0.5);
                 }
                 extended = true;
-            } else if (gamepad2.left_stick_y > 0.1 || !extended) {
-                intakeExtension.setTargetPosition(0);
+            } else if (gamepad2.left_stick_y > 0.02 || !extended) {
+                intakeExtension.setTargetPosition(10);
                 intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 intakeExtension.setPower(-0.4);
                 extended = false;
@@ -442,7 +445,7 @@ public class MainTeleOp extends LinearOpMode {
                 if(intakeExtension.getCurrentPosition()-intakeExtensionLowerLimit<100){
                     intakeExtension.setPower(0.2);
                 }
-                outtakeServo.setPosition(outtakeServoOpenPosition);
+                outtakeServo.setPosition(outtakeServoLimitUpperMidHub);
             }
 
             if (gamepad2.dpad_down) {
@@ -454,7 +457,7 @@ public class MainTeleOp extends LinearOpMode {
                 motorExLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 motorExLeft.setPower(outtakePower);
 
-                outtakeServo.setPosition(outtakeServoClosePosition);
+                outtakeServo.setPosition(outtakeServoLowerLimit);
             }
             telemetry.addData("intake Position: ", intakePosition.getPosition());
             if(gamepad1.right_trigger>0.6&&pressed){
