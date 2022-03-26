@@ -301,7 +301,7 @@ public class RedAutoV2 extends LinearOpMode {
                     if (!tankDrive.isBusy()) {
                         switchFromTankToMec();
                         sleep(200);
-                        mecanumDrive.turn(Math.toRadians(125));
+                        mecanumDrive.turn(Math.toRadians(120));
                         switchFromMecToTank();
                         sleep(200);
                         next(State.GO_TO_SHIPPING_HUB_2);
@@ -343,7 +343,10 @@ public class RedAutoV2 extends LinearOpMode {
                                 outtakeServo.setPosition(outtakeServoLimitLowerHub);
                             }
                             telemetry.addData("outtake servo position: ", outtakeServo.getPosition());
-                        }else if (elapsed < 1.8) {
+                        }else if (elapsed < 1) {
+                            //switchFromMecToTank();
+//                            tankDrive.followTrajectory(tankDrive.trajectoryBuilder(PoseStorage.currentPose).back(1).build());
+                        } else if (elapsed < 1.8) {
                             outtakeServo.setPosition(outtakeServoLowerLimit);
                             outtake.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             outtake.setTargetPosition(outtakeFirstLevelPosition);
