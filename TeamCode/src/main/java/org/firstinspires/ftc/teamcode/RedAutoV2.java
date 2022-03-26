@@ -47,7 +47,7 @@ public class RedAutoV2 extends LinearOpMode {
             goToTeammateItemFromShippingHubPart2, goToTeammateItemFromShippingHubPart3,
             goToTeammateItemFromShippingHubPart4, goToFreightFromShippingHub,
             goToSwitchingPosFromFreight, goToStorageUnitFromSwitchingPos, goToTeamCubeFromShippingHub1,
-            goToAllianceFreightFromShippingHub2, shippingHubAll1, shippingHubAll2, park1, park2;
+            goToAllianceFreightFromShippingHub2, goToShippingHub, shippingHubAll1, shippingHubAll2, park1, park2;
 
     Servo fr, br, fl, bl, outtakeServo, intakePosition;
 
@@ -85,9 +85,9 @@ public class RedAutoV2 extends LinearOpMode {
         GO_TO_SWITCHING_POS_2,
         DRIVE_TO_FREIGHT_2,
         PARK_1, PARK_2,
-        INTAKE_ALLIANCE,
+        INTAKE_ALLIANCE,SPIN,
         IDLE, GO_TO_SHIPPING_HUB_2, GO_TO_SHIPPING_HUB_TURN_2, TRANSITION_SCORE_FREIGHT_IN_SHIPPING_HUB,
-        SHIPPING_HUB_ALL1, PARK_IN_WAREHOUSE, GO_TO_ALLIANCE_FREIGHT_2, MOVE_OUTTAKE_UP, GO_TO_ALLIANCE_FREIGHT_3, SHIPPING_HUB_ALL2
+        SHIPPING_HUB_ALL1, PARK_IN_WAREHOUSE, GO_TO_ALLIANCE_FREIGHT_2, MOVE_OUTTAKE_UP, GO_TO_ALLIANCE_FREIGHT_3, GO_TO_SHIPPING_HUB_PARK, GO_TO_SHIPPING_HUB_PARK_2, SHIPPING_HUB_ALL2
     }
 
     void next(State s) {
@@ -123,6 +123,9 @@ public class RedAutoV2 extends LinearOpMode {
                 .forward(30)
                 .build();
 
+        goToShippingHub = tankDrive.trajectoryBuilder(goToTeamCubeFromShippingHub2.end())
+                .forward(65)
+                .build();
 
 //        parkWarehouse = tankDrive.trajectoryBuilder(goToShippingHubFromCarousel2.end())
 //                .forward(32)
@@ -381,38 +384,54 @@ public class RedAutoV2 extends LinearOpMode {
 //                        switchFromMecToTank();
 //                        sleep(200);;
                         tankDrive.followTrajectoryAsync(goToTeamCubeFromShippingHub2);
-                        next(State.GO_TO_ALLIANCE_FREIGHT_2);
+                        next(State.GO_TO_SHIPPING_HUB_PARK);
                     }
                     break;
-//                case GO_TO_ALLIANCE_FREIGHT_3:
-//                    if (!tankDrive.isBusy()) {
-//
-//                    }
-                case INTAKE_ALLIANCE:
-                    if (!tankDrive.isBusy()){
+                case GO_TO_SHIPPING_HUB_PARK:
+                    if (!tankDrive.isBusy()) {
                         switchFromTankToMec();
                         sleep(200);
-                        intakePosition.setPosition(intakeMecDown);
-                        sleep(200);
-                        intakeSurgical.setPower(0.6);
-                        intakeExtension.setTargetPosition(intakeExtension.getCurrentPosition()-180);
-                        intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        intakeExtension.setPower(0.2);
-                        sleep(1000);
-                        mecanumDrive.turn(Math.toRadians(15));
-                        mecanumDrive.turn(Math.toRadians(-15));
-                        intakePosition.setPosition(intakeUp);
-                        intakeExtension.setTargetPosition(intakeExtension.getCurrentPosition()+180);
-                        intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        intakeExtension.setPower(0.2);
-                        sleep(1000);
-                        intakeSurgical.setPower(-0.6);
-                        sleep(1000);
+                        mecanumDrive.turn(Math.toRadians(40));
                         switchFromMecToTank();
                         sleep(200);
-                        tankDrive.followTrajectoryAsync(shippingHubAll1);
-                        next(State.SHIPPING_HUB_ALL1);
+                        next(State.GO_TO_SHIPPING_HUB_PARK_2);
                     }
+                case GO_TO_SHIPPING_HUB_PARK_2:
+                    if (!tankDrive.isBusy()) {
+                        tankDrive.followTrajectoryAsync(goToShippingHub);
+                        next(State.SPIN);
+                    }
+                case SPIN:
+                    if (!tankDrive.isBusy()) {
+                        switchFromTankToMec();
+                        mecanumDrive.turn(Math.toRadians(360 * 5));
+                        next(State.IDLE);
+                    }
+//                case INTAKE_ALLIANCE:
+//                    if (!tankDrive.isBusy()){
+//                        switchFromTankToMec();
+//                        sleep(200);
+//                        intakePosition.setPosition(intakeMecDown);
+//                        sleep(200);
+//                        intakeSurgical.setPower(0.6);
+//                        intakeExtension.setTargetPosition(intakeExtension.getCurrentPosition()-180);
+//                        intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                        intakeExtension.setPower(0.2);
+//                        sleep(1000);
+//                        mecanumDrive.turn(Math.toRadians(15));
+//                        mecanumDrive.turn(Math.toRadians(-15));
+//                        intakePosition.setPosition(intakeUp);
+//                        intakeExtension.setTargetPosition(intakeExtension.getCurrentPosition()+180);
+//                        intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                        intakeExtension.setPower(0.2);
+//                        sleep(1000);
+//                        intakeSurgical.setPower(-0.6);
+//                        sleep(1000);
+//                        switchFromMecToTank();
+//                        sleep(200);
+//                        tankDrive.followTrajectoryAsync(shippingHubAll1);
+//                        next(State.SHIPPING_HUB_ALL1);
+//                    }
 
 //                case SHIPPING_HUB_ALL1:
 //                    if (!tankDrive.isBusy()) {
