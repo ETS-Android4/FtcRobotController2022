@@ -49,7 +49,7 @@ public class MainTeleOp extends LinearOpMode {
 
     public static double leftStickPos = 1;
 
-    public static double DPAD_SPEED = 0.35;
+    public static double DPAD_SPEED = 0.15;
     public static double BUMPER_ROTATION_SPEED = .7;
     public static double ROTATION_MULTIPLIER = .7;
 
