@@ -335,6 +335,12 @@ public class MainTeleOp extends LinearOpMode {
                 extended = false;
             }
 
+            if (intakeExtension.getCurrentPosition() >= 0 && intakeExtension.getCurrentPosition() <= 10) {
+                if (gamepad2.left_stick_y > -0.02 && gamepad2.left_stick_y < 0.02) {
+                    intakeExtension.setPower(-0.1);
+                }
+            }
+
             telemetry.addData("joystick: ", gamepad2.left_stick_y);
             telemetry.addData("intake extension pos: ", intakeExtension.getCurrentPosition());
             telemetry.addData("extended: ", extended);
