@@ -29,7 +29,7 @@ public class ServoConstants {
     // outtake servo limits
     public static double outtakeServoLowerLimit = 0.24;
     public static double outtakeServoLimitUpperMidHub = 0.9;
-    public static double outtakeServoLimitLowerHub = 0.8;
+    public static double outtakeServoLimitLowerHub = 0.7;
 
     public static double outtakePower = 0.5;
 }
