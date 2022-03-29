@@ -28,21 +28,25 @@ import org.firstinspires.ftc.teamcode.drive.SampleTankDrive;
 @Config
 public class MainTeleOp extends LinearOpMode {
 
+    // defining motors and servos
     DcMotorEx intakeSurgical, intakeExtension, outtake, motorExLeft, carousel,
-                fleft, fright, bleft, bright;
-    Servo intakePosition, outtakeServo, fr, br, fl, bl;
+            fleft, fright, bleft, bright;
+    Servo intakePosition, outtakeServo, fr, br, fl, bl, capperServo;
 
-    double mecDown = 0.92;
-    double intakeUp = 0.15;
-    double tankDown = 0.85;
+    // intake constants
+    double mecDown = 0.1;
+    double intakeUp = 0.58;
+    double tankDown = 0.148;
+
+    // outtake constants
     double outtakeDelay = 0.2;
-
     public static int outtakeThirdLevelPosition = -360;
     public static int outtakeFirstLevelPosition = -120;
     public static int outtakeDownPosition = 0;
     public static double outtakePower = 0.5;
-//    public static double outtakeServoClosePosition = 0.2;
-//    public static double outtakeServoOpenPosition = 0.7;
+
+    // public static double outtakeServoClosePosition = 0.2;
+    // public static double outtakeServoOpenPosition = 0.7;
 
     public static int intakeExtensionLowerLimit = -70;
     public static int intakeExtensionUpperLimit = 270;
@@ -77,17 +81,24 @@ public class MainTeleOp extends LinearOpMode {
         SampleTankDrive tankDrive = new SampleTankDrive(hardwareMap);
         tankDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        // defining gamepads
         GamepadEx gp1 = new GamepadEx(gamepad1);
         GamepadEx gp2 = new GamepadEx(gamepad2);
 
         ButtonReader redCarousel = new ButtonReader(gp2, GamepadKeys.Button.B);
         ButtonReader blueCarousel = new ButtonReader(gp2, GamepadKeys.Button.X);
 
+        ButtonReader capperDown = new ButtonReader(gp2, GamepadKeys.Button.A);
+        ButtonReader capperUp = new ButtonReader(gp2, GamepadKeys.Button.Y);
+
         fl = hardwareMap.get(Servo.class, "frontleft"); // lower: 0.984, upper: 0
         fr = hardwareMap.get(Servo.class, "frontright"); // lower: .1, upper: 1
         br = hardwareMap.get(Servo.class, "backright"); // lower: 0.954, upper: 0
         bl = hardwareMap.get(Servo.class, "backleft"); // lower: 0.02, upper: 1
 
+        capperServo = hardwareMap.get(Servo.class, "capperServo"); // registered in driver station
+
+        // drivetrain motor init
         fleft = hardwareMap.get(DcMotorEx.class, "front_left");
         fright = hardwareMap.get(DcMotorEx.class, "front_right");
         bleft = hardwareMap.get(DcMotorEx.class, "rear_left");
@@ -96,7 +107,6 @@ public class MainTeleOp extends LinearOpMode {
         motorExLeft = (DcMotorEx)hardwareMap.get(DcMotor.class, "intake");
         outtakeServo = hardwareMap.get(Servo.class, "outtake servo");
         outtakeServo.setDirection(Servo.Direction.FORWARD);
-
 
         intakeSurgical = hardwareMap.get(DcMotorEx.class, "intakeSurgical");
         intakeSurgical.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -145,6 +155,8 @@ public class MainTeleOp extends LinearOpMode {
 
         boolean toggleOff = false;
 
+        capperServo.setPosition(capInit);
+
         waitForStart();
 
         while (!isStopRequested()) {
@@ -173,8 +185,13 @@ public class MainTeleOp extends LinearOpMode {
             redCarousel.readValue();
             blueCarousel.readValue();
 
+            capperDown.readValue();
+            capperUp.readValue();
+
             Vector2d translation = new Vector2d(-gamepad1.left_stick_y*scaler, -gamepad1.left_stick_x*scaler);
             double rotation = -ROTATION_MULTIPLIER * gamepad1.right_stick_x * scaler;
+
+            // Gamepad 1
 
             // slow translation with dpad
             if (gamepad1.dpad_up) {
@@ -199,6 +216,15 @@ public class MainTeleOp extends LinearOpMode {
             } else {
                 translation = new Vector2d(-gamepad1.left_stick_y*scaler, 0.0);
                 tankDrive.setWeightedDrivePower(new Pose2d(translation, rotation));
+            }
+
+            // capper
+            if (gamepad2.a) {
+                // capper down
+                capperServo.setPosition(capUp);
+            } else if (gamepad2.y) {
+                // capper up
+                capperServo.setPosition(capDown);
             }
 
             // carousel
@@ -329,16 +355,21 @@ public class MainTeleOp extends LinearOpMode {
                     intakeExtension.setPower(0.5);
                 }
                 extended = true;
-            } else if (gamepad2.left_stick_y > 0.02 || !extended) {
-                intakeExtension.setTargetPosition(10);
-                intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                intakeExtension.setPower(-0.4);
-                extended = false;
             }
 
-            if (intakeExtension.getCurrentPosition() >= 0 && intakeExtension.getCurrentPosition() <= 10) {
+//            else if (gamepad2.left_stick_y > 0.02 || !extended) { # what code makes left_stick_y > 0.02 go in then?
+//                intakeExtension.setTargetPosition(0);
+//                intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                intakeExtension.setPower(-0.4);
+//                extended = false;
+//            }
+
+            if (intakeExtension.getCurrentPosition() >= -70 && intakeExtension.getCurrentPosition() <= 10) {
                 if (gamepad2.left_stick_y > -0.02 && gamepad2.left_stick_y < 0.02) {
-                    intakeExtension.setPower(-0.1);
+                    telemetry.addLine("pulling back");
+                    intakeExtension.setTargetPosition(-60);
+                    intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    intakeExtension.setPower(-0.001);
                 }
             }
 
@@ -417,37 +448,45 @@ public class MainTeleOp extends LinearOpMode {
             // outtake
 
             if (gamepad2.dpad_up) {
-                if(timer ==-1){
-                    timer=getRuntime();
-                }
-                if(intakeExtension.getCurrentPosition()-intakeExtensionLowerLimit<200){
-                    intakeExtension.setPower(0.3);
-                }
-                if(getRuntime()-timer>outtakeDelay) {
-                    intakeExtension.setPower(0);
-                    motorExLeft.setTargetPosition(outtakeThirdLevelPosition);
-                    motorExLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    motorExLeft.setPower(outtakePower);
-                }
-            }else{
-                timer = -1;
+//                if(timer ==-1){
+//                    timer=getRuntime();
+//                }
+//                if(intakeExtension.getCurrentPosition()-intakeExtensionLowerLimit<200){
+//                    intakeExtension.setPower(0.3);
+//                }
+//                if(getRuntime()-timer>outtakeDelay) {
+                intakeExtension.setTargetPosition(40);
+                intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                intakeExtension.setPower(0.5);
+
+                sleep(500);
+
+                motorExLeft.setTargetPosition(outtakeThirdLevelPosition);
+                motorExLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                motorExLeft.setPower(outtakePower);
+//                }
+//            }else{
+//                timer = -1;
+//            }
             }
 
             if (gamepad2.dpad_left) {
-                if(timer ==-1){
-                    timer=getRuntime();
-                }
-                if(intakeExtension.getCurrentPosition()-intakeExtensionLowerLimit<200){
-                    intakeExtension.setPower(0.3);
-                }
-                if(getRuntime()-timer>outtakeDelay) {
-                    intakeExtension.setPower(0);
-                    motorExLeft.setTargetPosition(outtakeFirstLevelPosition);
-                    motorExLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    motorExLeft.setPower(outtakePower);
-                }
-            }else{
-                timer = -1;
+//                if(timer ==-1){
+//                    timer=getRuntime();
+//                }
+//                if(intakeExtension.getCurrentPosition()-intakeExtensionLowerLimit<200){
+//                    intakeExtension.setPower(0.3);
+//                }
+//                if(getRuntime()-timer>outtakeDelay) {
+
+
+                motorExLeft.setTargetPosition(outtakeFirstLevelPosition);
+                motorExLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                motorExLeft.setPower(outtakePower);
+//                }
+//            }else{
+//                timer = -1;
+//            }
             }
 
 //            // FIX THIS
@@ -474,9 +513,16 @@ public class MainTeleOp extends LinearOpMode {
             }
 
             if (gamepad2.dpad_down) {
+
                 if(intakeExtension.getCurrentPosition()-intakeExtensionLowerLimit<100){
                     intakeExtension.setPower(0.2);
                 }
+
+                intakeExtension.setTargetPosition(40);
+                intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                intakeExtension.setPower(0.5);
+
+                sleep(500);
 
                 motorExLeft.setTargetPosition(outtakeDownPosition);
                 motorExLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -500,13 +546,18 @@ public class MainTeleOp extends LinearOpMode {
 
                 }else{
                     // switching from tank to mec
-                    if(intakePosition.getPosition() > tankDown - 0.01 && intakePosition.getPosition() < tankDown + 0.01){
-                        intakePosition.setPosition(mecDown);
-                    }
+
                     fl.setPosition(flMec);
                     fr.setPosition(frMec);
                     br.setPosition(brMec);
                     bl.setPosition(blMec);
+
+                    sleep(200); // delay 200 milliseconds so no intake slamming upon switch
+
+                    if(intakePosition.getPosition() > tankDown - 0.01 && intakePosition.getPosition() < tankDown + 0.01){
+                        intakePosition.setPosition(mecDown);
+                    }
+
                     isMec=true;
 
                 }
