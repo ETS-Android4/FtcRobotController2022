@@ -515,18 +515,18 @@ public class MainTeleOp extends LinearOpMode {
             if (gamepad2.dpad_down) {
 
                 if(intakeExtension.getCurrentPosition()-intakeExtensionLowerLimit<100){
-                    intakeExtension.setPower(0.2);
+                    intakeExtension.setPower(0.7);
                 }
 
                 intakeExtension.setTargetPosition(40);
                 intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                intakeExtension.setPower(0.5);
+                intakeExtension.setPower(0.7);
 
                 sleep(500);
 
                 motorExLeft.setTargetPosition(outtakeDownPosition);
                 motorExLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                motorExLeft.setPower(outtakePower);
+                motorExLeft.setPower(outtakePower*0.6);
 
                 outtakeServo.setPosition(outtakeServoLowerLimit);
             }
