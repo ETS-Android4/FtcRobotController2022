@@ -34,9 +34,9 @@ public class MainTeleOp extends LinearOpMode {
     Servo intakePosition, outtakeServo, fr, br, fl, bl, capperServo;
 
     // intake constants
-    double mecDown = 0.1;
-    double intakeUp = 0.58;
-    double tankDown = 0.148;
+    double mecDown = 0.095;
+    double intakeUp = 0.57;
+    double tankDown = 0.140;
 
     // outtake constants
     double outtakeDelay = 0.2;
@@ -48,9 +48,9 @@ public class MainTeleOp extends LinearOpMode {
     // public static double outtakeServoClosePosition = 0.2;
     // public static double outtakeServoOpenPosition = 0.7;
 
-    public static int intakeExtensionLowerLimit = -70;
-    public static int intakeExtensionUpperLimit = 270;
-    public static double intakePower = 0.6;
+    public static int intakeExtensionLowerLimit, intakeExtensionUpperLimit;
+    //public static = 270;
+    //public static double intakePower = 0.6;
 
     public static double leftStickPos = 1;
 
@@ -388,7 +388,7 @@ public class MainTeleOp extends LinearOpMode {
 
             telemetry.addData("joystick: ", gamepad2.left_stick_y);
             telemetry.addData("intake extension pos: ", intakeExtension.getCurrentPosition());
-            telemetry.addData("extended: ", extended);
+//          telemetry.addData("extended: ", extended);
 
 //            if(!gamepad2.dpad_left&&!gamepad2.dpad_up&&!gamepad2.dpad_down&&!gamepad2.dpad_right){
 //                if (gamepad2.left_stick_y > 0.1) {
@@ -468,13 +468,13 @@ public class MainTeleOp extends LinearOpMode {
 //                    intakeExtension.setPower(0.3);
 //                }
 //                if(getRuntime()-timer>outtakeDelay) {
-                if (intakeExtension.getCurrentPosition() < 40) {
-                    intakeExtension.setTargetPosition(40);
-                    intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    intakeExtension.setPower(0.5);
-                }
-
-                sleep(500);
+//                if (intakeExtension.getCurrentPosition() < 40) {
+//                    intakeExtension.setTargetPosition(40);
+//                    intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                    intakeExtension.setPower(0.5);
+//                }
+//
+//                sleep(500);
 
                 motorExLeft.setTargetPosition(outtakeThirdLevelPosition);
                 motorExLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -532,13 +532,13 @@ public class MainTeleOp extends LinearOpMode {
 /*                if(intakeExtension.getCurrentPosition()-intakeExtensionLowerLimit<100){
                     intakeExtension.setPower(0.7);
                 }*/
-                if (intakeExtension.getCurrentPosition() < 40) {
-                    intakeExtension.setTargetPosition(40);
-                    intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    intakeExtension.setPower(0.7);
-                }
-
-                sleep(500);
+//                if (intakeExtension.getCurrentPosition() < 40) {
+//                    intakeExtension.setTargetPosition(40);
+//                    intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                    intakeExtension.setPower(0.7);
+//                }
+//
+//                sleep(500);
 
                 motorExLeft.setTargetPosition(outtakeDownPosition);
                 motorExLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
