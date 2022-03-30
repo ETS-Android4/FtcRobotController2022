@@ -34,7 +34,9 @@ public class ServoConstants {
     public static double outtakePower = 0.5;
 
     // capper servo limits
+    public static double capStep = 0.02;
     public static double capInit = 0;
     public static double capUp = 0;
-    public static double capDown = 0;
+    public static double capDown = 0.98;
+
 }

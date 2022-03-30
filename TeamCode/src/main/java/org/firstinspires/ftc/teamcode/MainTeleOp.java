@@ -134,8 +134,13 @@ public class MainTeleOp extends LinearOpMode {
         telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
 
         // init robot
+        intakeExtension.setTargetPosition(-60);
+        intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        intakeExtension.setPower(-0.5);
+
         intakeExtensionLowerLimit = intakeExtension.getCurrentPosition();
         intakeExtensionUpperLimit = intakeExtensionLowerLimit + 270;
+
         intakePosition.setPosition(intakeUp);
         motorExLeft.setTargetPosition(outtakeDownPosition);
         outtakeServo.setPosition(outtakeServoLowerLimit);
@@ -155,9 +160,9 @@ public class MainTeleOp extends LinearOpMode {
 
         boolean toggleOff = false;
 
-        capperServo.setPosition(capInit);
-
         waitForStart();
+
+        capperServo.setPosition(capInit);
 
         while (!isStopRequested()) {
             double elapsed = runtime.seconds() - time;
@@ -221,10 +226,14 @@ public class MainTeleOp extends LinearOpMode {
             // capper
             if (gamepad2.a) {
                 // capper down
-                capperServo.setPosition(capUp);
+                if (capperServo.getPosition() + capStep < capDown) {
+                    capperServo.setPosition(capperServo.getPosition() + capStep);
+                }
             } else if (gamepad2.y) {
                 // capper up
-                capperServo.setPosition(capDown);
+                if (capperServo.getPosition() - capStep > capInit) {
+                    capperServo.setPosition(capperServo.getPosition() - capStep);
+                }
             }
 
             // carousel
@@ -341,10 +350,11 @@ public class MainTeleOp extends LinearOpMode {
 
 
             // intake extension motor
-            if (gamepad2.left_stick_y < -0.02 || extended) {
+            if (gamepad2.left_stick_y < -0.02) {
                 double joystickPosition = gamepad2.left_stick_y;
                 telemetry.addData("curr pos: ", intakeExtension.getCurrentPosition());
                 telemetry.addData("statement: ", intakeExtension.getCurrentPosition() > intakeExtensionLowerLimit);
+
                 if (intakeExtension.getCurrentPosition() > -70) {
 //                    telemetry.addData("statement: ", gamepad2.left_stick_y < -0.1);
 //                    telemetry.addData("pos: ", (int) (joystickPosition * 270 * (-1)));
@@ -354,20 +364,20 @@ public class MainTeleOp extends LinearOpMode {
                     intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     intakeExtension.setPower(0.5);
                 }
-                extended = true;
+                //extended = true;
             }
 
-//            else if (gamepad2.left_stick_y > 0.02 || !extended) { # what code makes left_stick_y > 0.02 go in then?
-//                intakeExtension.setTargetPosition(0);
-//                intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                intakeExtension.setPower(-0.4);
-//                extended = false;
-//            }
+            else if (gamepad2.left_stick_y > 0.02) { // what code makes left_stick_y > 0.02 go in then?
+                intakeExtension.setTargetPosition(-50);
+                intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                intakeExtension.setPower(-0.2);
+                //extended = false;
+            }
 
             if (intakeExtension.getCurrentPosition() >= -70 && intakeExtension.getCurrentPosition() <= 10) {
                 if (gamepad2.left_stick_y > -0.02 && gamepad2.left_stick_y < 0.02) {
                     telemetry.addLine("pulling back");
-                    intakeExtension.setTargetPosition(-60);
+                    intakeExtension.setTargetPosition(-50);
                     intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     intakeExtension.setPower(-0.001);
                 }
@@ -455,9 +465,11 @@ public class MainTeleOp extends LinearOpMode {
 //                    intakeExtension.setPower(0.3);
 //                }
 //                if(getRuntime()-timer>outtakeDelay) {
-                intakeExtension.setTargetPosition(40);
-                intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                intakeExtension.setPower(0.5);
+                if (intakeExtension.getCurrentPosition() < 40) {
+                    intakeExtension.setTargetPosition(40);
+                    intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    intakeExtension.setPower(0.5);
+                }
 
                 sleep(500);
 

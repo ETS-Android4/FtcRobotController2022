@@ -20,15 +20,15 @@ public class LimitTest extends LinearOpMode {
 //        motor.setDirection(DcMotor.Direction.REVERSE);
 //        motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Servo bl = hardwareMap.get(Servo.class, "capperServo"); // change to servo name
-        bl.scaleRange(0.0, 1.0);
+        //bl.scaleRange(0.0, 1.0);
 
         //intakePosition = hardwareMap.get(Servo.class, "intakeLift");
-//        DcMotorEx intakeExtension = hardwareMap.get(DcMotorEx.class, "intakeExtension");
-//        intakeExtension.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-//        intakeExtension.setDirection(DcMotor.Direction.REVERSE);
-//
-//        intakeExtension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//
+        DcMotorEx intakeExtension = hardwareMap.get(DcMotorEx.class, "intakeExtension");
+        intakeExtension.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        intakeExtension.setDirection(DcMotor.Direction.REVERSE);
+
+        intakeExtension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
 //
 //        DcMotorEx outtake = hardwareMap.get(DcMotorEx.class, "intake");
 //        outtake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -48,14 +48,18 @@ public class LimitTest extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            bl.setPosition(servoPos);
-//            intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//            intakeExtension.setTargetPosition(100);
-//            intakeExtension.setPower(0.5);
+            //bl.setPosition(servoPos);
+            intakeExtension.setTargetPosition(100);
+            intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            intakeExtension.setPower(0.5);
             telemetry.addData("pos: ", bl.getPosition());
 //            outtake.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //            outtake.setTargetPosition(-120);
 //            outtake.setPower(0.5);
+            intakeExtension.setTargetPosition(-60);
+            intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            intakeExtension.setPower(-0.5);
+            break;
 
             //s.setPosition(servoPower);
             //fl.setPosition(0.0);
@@ -67,7 +71,6 @@ public class LimitTest extends LinearOpMode {
 //            }
 
             //telemetry.addData("position",motor.getCurrentPosition());
-            telemetry.update();
         }
     }
 }
