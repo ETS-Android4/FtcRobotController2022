@@ -181,9 +181,11 @@ public class MainTeleOp extends LinearOpMode {
             telemetry.addData("x", poseEstimate.getX());
             telemetry.addData("y", poseEstimate.getY());
             telemetry.addData("heading", poseEstimate.getHeading());
-            telemetry.addData("scaler", scaler);
-            telemetry.addData("intake servo position: ", intakePosition.getPosition());
-            telemetry.addData("outtakePosition: ", outtake.getCurrentPosition());
+            telemetry.addData("ie lower limit:", intakeExtensionLowerLimit);
+            telemetry.addData("ie upper limit:", intakeExtensionUpperLimit);
+//            telemetry.addData("scaler", scaler);
+//            telemetry.addData("intake servo position: ", intakePosition.getPosition());
+//            telemetry.addData("outtakePosition: ", outtake.getCurrentPosition());
             //telemetry.addData("upper limit: ", intakeExtensionUpperLimit);
             //telemetry.addData("lower limit: ", intakeExtensionLowerLimit);
 
@@ -355,29 +357,30 @@ public class MainTeleOp extends LinearOpMode {
                 telemetry.addData("curr pos: ", intakeExtension.getCurrentPosition());
                 telemetry.addData("statement: ", intakeExtension.getCurrentPosition() > intakeExtensionLowerLimit);
 
-                if (intakeExtension.getCurrentPosition() > -70) {
+                if (intakeExtension.getCurrentPosition() >= intakeExtensionLowerLimit) {
+                    telemetry.addData("pos to move: ", (intakeExtensionLowerLimit + joystickPosition * 270 * (-1)));
 //                    telemetry.addData("statement: ", gamepad2.left_stick_y < -0.1);
 //                    telemetry.addData("pos: ", (int) (joystickPosition * 270 * (-1)));
 //
                     telemetry.addData("test", 0);
-                    intakeExtension.setTargetPosition((int) (joystickPosition * 270 * (-1)));
+                    intakeExtension.setTargetPosition((int) (intakeExtensionLowerLimit + joystickPosition * 270 * (-1)));
                     intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    intakeExtension.setPower(0.5);
+                    intakeExtension.setPower(0.4);
                 }
                 //extended = true;
             }
 
-            else if (gamepad2.left_stick_y > 0.02) { // what code makes left_stick_y > 0.02 go in then?
-                intakeExtension.setTargetPosition(-50);
+            if (gamepad2.left_stick_y >= 0) { // what code makes left_stick_y > 0.02 go in then?
+                intakeExtension.setTargetPosition(intakeExtensionLowerLimit);
                 intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                intakeExtension.setPower(-0.2);
+                intakeExtension.setPower(-0.3);
                 //extended = false;
             }
 
-            if (intakeExtension.getCurrentPosition() >= -70 && intakeExtension.getCurrentPosition() <= 10) {
+            if (intakeExtension.getCurrentPosition() >= intakeExtensionLowerLimit && intakeExtension.getCurrentPosition() <= intakeExtensionLowerLimit + 20) {
                 if (gamepad2.left_stick_y > -0.02 && gamepad2.left_stick_y < 0.02) {
                     telemetry.addLine("pulling back");
-                    intakeExtension.setTargetPosition(-50);
+                    intakeExtension.setTargetPosition(intakeExtensionLowerLimit);
                     intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     intakeExtension.setPower(-0.001);
                 }
@@ -517,22 +520,23 @@ public class MainTeleOp extends LinearOpMode {
 //            }
 
             if (gamepad2.dpad_right) {
-                if(intakeExtension.getCurrentPosition()-intakeExtensionLowerLimit<100){
-                    intakeExtension.setPower(0.2);
-                }
+//                if(intakeExtension.getCurrentPosition()-intakeExtensionLowerLimit<100){
+//                    intakeExtension.setPower(0.2);
+//                }
 
                 outtakeServo.setPosition(outtakeServoLimitUpperMidHub);
             }
 
             if (gamepad2.dpad_down) {
 
-                if(intakeExtension.getCurrentPosition()-intakeExtensionLowerLimit<100){
+/*                if(intakeExtension.getCurrentPosition()-intakeExtensionLowerLimit<100){
+                    intakeExtension.setPower(0.7);
+                }*/
+                if (intakeExtension.getCurrentPosition() < 40) {
+                    intakeExtension.setTargetPosition(40);
+                    intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     intakeExtension.setPower(0.7);
                 }
-
-                intakeExtension.setTargetPosition(40);
-                intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                intakeExtension.setPower(0.7);
 
                 sleep(500);
 
@@ -543,6 +547,7 @@ public class MainTeleOp extends LinearOpMode {
                 outtakeServo.setPosition(outtakeServoLowerLimit);
             }
             telemetry.addData("intake Position: ", intakePosition.getPosition());
+
             if(gamepad1.right_trigger>0.6&&pressed){
                 if(isMec){
                     // switcing from mec to tank
