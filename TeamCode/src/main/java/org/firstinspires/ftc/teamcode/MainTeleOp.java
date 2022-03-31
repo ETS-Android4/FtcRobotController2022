@@ -54,7 +54,7 @@ public class MainTeleOp extends LinearOpMode {
 
     public static double leftStickPos = 1;
 
-    public static double DPAD_SPEED = 0.15;
+    public static double DPAD_SPEED = 0.18;
     public static double BUMPER_ROTATION_SPEED = .7;
     public static double ROTATION_MULTIPLIER = .7;
 
@@ -211,6 +211,18 @@ public class MainTeleOp extends LinearOpMode {
                 translation = new Vector2d(0, -DPAD_SPEED);
             }
 
+            // making speed slower when left trigger is pressed
+            // tank mode should only have value != 0 in x component
+            if (gamepad1.left_trigger > 0) {
+                if (translation.getX() != 0) {
+                    translation = new Vector2d(translation.getX() * 1/2, 0);
+                } else {
+                     translation = new Vector2d(0, translation.getY() * 1/2);
+                }
+            }
+
+            //telemetry.addData("left trigger: ", gamepad1.left_trigger);
+
             // slow rotation with bumpers
             if (gamepad1.left_bumper) {
                 rotation = BUMPER_ROTATION_SPEED;
@@ -221,7 +233,16 @@ public class MainTeleOp extends LinearOpMode {
             if (isMec) {
                 mecDrive.setWeightedDrivePower(new Pose2d(translation, rotation));
             } else {
-                translation = new Vector2d(-gamepad1.left_stick_y*scaler, 0.0);
+                // y in tank should always be 0!
+                if (gamepad1.left_trigger > 0) {
+                    if (translation.getX() != 0) {
+                        translation = new Vector2d(translation.getX() * 1/2, 0);
+                    } else {
+                        translation = new Vector2d(translation.getY() * 1/2, 0);
+                    }
+                } else {
+                    translation = new Vector2d(-gamepad1.left_stick_y*scaler, 0.0);
+                }
                 tankDrive.setWeightedDrivePower(new Pose2d(translation, rotation));
             }
 
@@ -235,6 +256,18 @@ public class MainTeleOp extends LinearOpMode {
                 // capper up
                 if (capperServo.getPosition() - capStep > capInit) {
                     capperServo.setPosition(capperServo.getPosition() - capStep);
+                }
+            }
+
+            if (gamepad2.right_bumper) {
+                // cap servo pos increases slowly
+                if (capperServo.getPosition() + capStep < capDown) {
+                    capperServo.setPosition(capperServo.getPosition() + capStepSlow);
+                }
+            } else if (gamepad2.left_bumper) {
+                // cap servo pos decreases slowly
+                if (capperServo.getPosition() - capStep > capInit) {
+                    capperServo.setPosition(capperServo.getPosition() - capStepSlow);
                 }
             }
 
@@ -264,10 +297,10 @@ public class MainTeleOp extends LinearOpMode {
 
             if (gamepad2.x) {
                 noCarousel = false;
-                if (runtime.seconds() - lastX < 1.5) {
-                    carousel.setPower(0.1);
-                } else {
+                if (runtime.seconds() - lastX < 1.25) {
                     carousel.setPower(1);
+                } else {
+                    carousel.setPower(0.5);
                 }
             } else {
                 lastX = runtime.seconds();
@@ -275,8 +308,8 @@ public class MainTeleOp extends LinearOpMode {
 
             if (gamepad2.b) {
                 noCarousel = false;
-                if (runtime.seconds() - lastB < 1.5) {
-                    carousel.setPower(-1);
+                if (runtime.seconds() - lastB < 1.25) {
+                    carousel.setPower(-0.5);
                 } else {
                     carousel.setPower(-1);
                 }
@@ -286,32 +319,7 @@ public class MainTeleOp extends LinearOpMode {
 
             if (noCarousel) carousel.setPower(0);
 
-//            double state = 0;
-//            if(gamepad2.x){
-//                state=Math.min(1,state+1);
-//            }
-//            if(gamepad2.b){
-//                state=Math.max(-1,state-1);
-//            }
-//
-//            if (elapsed < 1.5) {
-//                carousel.setPower(0.8 * state);
-//            } else {
-//                carousel.setPower(1 * state);
-//            }
-//            if (redCarousel.isDown()) {
-//                carousel.setPower(-1);
-//            } else {
-//                carousel.setPower(0.0);
-//            }
-//
-//            if (blueCarousel.isDown()) {
-//                carousel.setPower(1);
-//            } else {
-//                carousel.setPower(0.0);
-//            }
-
-            telemetry.addData("red carousel down: ", redCarousel.isDown());
+            //telemetry.addData("red carousel down: ", redCarousel.isDown());
 
             // surgical tubing
             if (gamepad2.right_trigger < 0.5 && gamepad2.left_trigger < 0.5) {
@@ -354,18 +362,18 @@ public class MainTeleOp extends LinearOpMode {
             // intake extension motor
             if (gamepad2.left_stick_y < -0.02) {
                 double joystickPosition = gamepad2.left_stick_y;
-                telemetry.addData("curr pos: ", intakeExtension.getCurrentPosition());
-                telemetry.addData("statement: ", intakeExtension.getCurrentPosition() > intakeExtensionLowerLimit);
+//                telemetry.addData("curr pos: ", intakeExtension.getCurrentPosition());
+//                telemetry.addData("statement: ", intakeExtension.getCurrentPosition() > intakeExtensionLowerLimit);
 
                 if (intakeExtension.getCurrentPosition() >= intakeExtensionLowerLimit) {
-                    telemetry.addData("pos to move: ", (intakeExtensionLowerLimit + joystickPosition * 270 * (-1)));
+                    //telemetry.addData("pos to move: ", (intakeExtensionLowerLimit + joystickPosition * 270 * (-1)));
 //                    telemetry.addData("statement: ", gamepad2.left_stick_y < -0.1);
 //                    telemetry.addData("pos: ", (int) (joystickPosition * 270 * (-1)));
 //
-                    telemetry.addData("test", 0);
+                    //telemetry.addData("test", 0);
                     intakeExtension.setTargetPosition((int) (intakeExtensionLowerLimit + joystickPosition * 270 * (-1)));
                     intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    intakeExtension.setPower(0.4);
+                    intakeExtension.setPower(0.7);
                 }
                 //extended = true;
             }
@@ -373,151 +381,36 @@ public class MainTeleOp extends LinearOpMode {
             if (gamepad2.left_stick_y >= 0) { // what code makes left_stick_y > 0.02 go in then?
                 intakeExtension.setTargetPosition(intakeExtensionLowerLimit);
                 intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                intakeExtension.setPower(-0.3);
+                intakeExtension.setPower(-0.5);
                 //extended = false;
             }
 
             if (intakeExtension.getCurrentPosition() >= intakeExtensionLowerLimit && intakeExtension.getCurrentPosition() <= intakeExtensionLowerLimit + 20) {
                 if (gamepad2.left_stick_y > -0.02 && gamepad2.left_stick_y < 0.02) {
-                    telemetry.addLine("pulling back");
+                    //telemetry.addLine("pulling back");
                     intakeExtension.setTargetPosition(intakeExtensionLowerLimit);
                     intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     intakeExtension.setPower(-0.001);
                 }
             }
 
-            telemetry.addData("joystick: ", gamepad2.left_stick_y);
-            telemetry.addData("intake extension pos: ", intakeExtension.getCurrentPosition());
+            //telemetry.addData("joystick: ", gamepad2.left_stick_y);
+            //telemetry.addData("intake extension pos: ", intakeExtension.getCurrentPosition());
 //          telemetry.addData("extended: ", extended);
-
-//            if(!gamepad2.dpad_left&&!gamepad2.dpad_up&&!gamepad2.dpad_down&&!gamepad2.dpad_right){
-//                if (gamepad2.left_stick_y > 0.1) {
-//                    if(lastvaluefront==-1){
-//                        startpoint = (int) intakeExtensionUpperLimit;
-//                    }else if(getRuntime()-lastvaluefront>0.1){
-//                        startpoint=intakeExtension.getCurrentPosition();
-//                    }
-//                    lastvaluefront=getRuntime();
-//                    int pos =  intakeExtension.getCurrentPosition();
-//                    pos = startpoint-pos;
-//                    pos = startpoint+(int)intakeExtensionLowerLimit-pos;
-//                    double dist = Math.abs(startpoint-intakeExtensionLowerLimit);
-//                    double function = Math.max((0.12 * (Math.sin((Math.PI / dist) * pos) * Math.exp(Math.PI * pos / dist))), 0.2);
-//                    if(function>1.5){
-//                        function=0.1;
-//                    }
-//                    // intake should come back up
-//                    if (intakeExtension.getCurrentPosition() >= intakeExtensionLowerLimit) {
-//                        power = 1/1.7 *(gamepad2.left_stick_y * (function));
-//                        intakeExtension.setTargetPosition((int) intakeExtensionLowerLimit);
-//                        intakeExtension.setPower(-(power+0.2));
-//                    } else {
-//                        intakeExtension.setPower(0.0);
-//                    }
-//                } else if (gamepad2.left_stick_y < -0.1) {
-//
-//                    if(lastvaluelast==-1){
-//                        startpoint = (int) intakeExtensionLowerLimit;
-//                    }else if(getRuntime()-lastvaluelast>0.1){
-//                        startpoint=intakeExtension.getCurrentPosition();
-//
-//                    }
-//                    lastvaluelast=getRuntime();
-//                    int pos =intakeExtension.getCurrentPosition();
-//                    pos = pos-startpoint;
-//
-//                    pos=startpoint+(int)intakeExtensionUpperLimit-pos;
-//
-//                    double dist = Math.abs(startpoint-intakeExtensionUpperLimit);
-//                    double function = Math.max((0.12 * (Math.sin((Math.PI / dist) * pos) * Math.exp(Math.PI * pos / dist))), 0.2);
-//                    if(function>1.01){
-//                        function=0.1;
-//                    }
-//                    // intake extends
-//
-//                    if (intakeExtension.getCurrentPosition() <= intakeExtensionUpperLimit) {
-//                        power = 1/1.7* (gamepad2.left_stick_y * (function));
-//                        intakeExtension.setPower(-(power+0.1));
-//                    } else {
-//                        intakeExtension.setPower(0.0);
-//                    }
-//                } else {
-//                    if(Math.abs(intakeExtension.getCurrentPosition()-intakeExtensionLowerLimit)<30.0){
-//                        intakeExtension.setPower(-(0.2+0.1));
-//                    }else{
-//                        if(motorExLeft.getCurrentPosition()==outtakeDownPosition) {
-//                            intakeExtension.setPower(-(0.2+0.1));
-//                        }else{
-//                            intakeExtension.setPower(0.0);
-//                        }
-//                    }
-//
-//                }
-//            }else{
-//
-//
-//            }
 
             // outtake
 
             if (gamepad2.dpad_up) {
-//                if(timer ==-1){
-//                    timer=getRuntime();
-//                }
-//                if(intakeExtension.getCurrentPosition()-intakeExtensionLowerLimit<200){
-//                    intakeExtension.setPower(0.3);
-//                }
-//                if(getRuntime()-timer>outtakeDelay) {
-//                if (intakeExtension.getCurrentPosition() < 40) {
-//                    intakeExtension.setTargetPosition(40);
-//                    intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    intakeExtension.setPower(0.5);
-//                }
-//
-//                sleep(500);
-
                 motorExLeft.setTargetPosition(outtakeThirdLevelPosition);
                 motorExLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 motorExLeft.setPower(outtakePower);
-//                }
-//            }else{
-//                timer = -1;
-//            }
             }
 
             if (gamepad2.dpad_left) {
-//                if(timer ==-1){
-//                    timer=getRuntime();
-//                }
-//                if(intakeExtension.getCurrentPosition()-intakeExtensionLowerLimit<200){
-//                    intakeExtension.setPower(0.3);
-//                }
-//                if(getRuntime()-timer>outtakeDelay) {
-
-
                 motorExLeft.setTargetPosition(outtakeFirstLevelPosition);
                 motorExLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 motorExLeft.setPower(outtakePower);
-//                }
-//            }else{
-//                timer = -1;
-//            }
             }
-
-//            // FIX THIS
-//            if (gamepad2.y) {
-//                if (outtake.getCurrentPosition() < outtakeThirdLevelPosition && outtake.getCurrentPosition() > -5) {
-//                    telemetry.addLine("raising manually");
-//                    outtake.setPower(0.2);
-//                }
-//            }
-//
-//            if (gamepad2.a) {
-//                if (outtake.getCurrentPosition() < outtakeThirdLevelPosition && outtake.getCurrentPosition() > -5) {                    telemetry.addLine("raising manually");
-//                    telemetry.addLine("lowering manually");
-//                    outtake.setPower(-0.2);
-//                }
-//            }
 
             if (gamepad2.dpad_right) {
 //                if(intakeExtension.getCurrentPosition()-intakeExtensionLowerLimit<100){
@@ -528,25 +421,13 @@ public class MainTeleOp extends LinearOpMode {
             }
 
             if (gamepad2.dpad_down) {
-
-/*                if(intakeExtension.getCurrentPosition()-intakeExtensionLowerLimit<100){
-                    intakeExtension.setPower(0.7);
-                }*/
-//                if (intakeExtension.getCurrentPosition() < 40) {
-//                    intakeExtension.setTargetPosition(40);
-//                    intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    intakeExtension.setPower(0.7);
-//                }
-//
-//                sleep(500);
-
                 motorExLeft.setTargetPosition(outtakeDownPosition);
                 motorExLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 motorExLeft.setPower(outtakePower*0.6);
 
                 outtakeServo.setPosition(outtakeServoLowerLimit);
             }
-            telemetry.addData("intake Position: ", intakePosition.getPosition());
+            //telemetry.addData("intake Position: ", intakePosition.getPosition());
 
             if(gamepad1.right_trigger>0.6&&pressed){
                 if(isMec){

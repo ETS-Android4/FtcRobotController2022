@@ -18,7 +18,7 @@ public class ServoConstants {
     // intake servo limits
     public static double intakeMecDown = 0.92;
     public static double intakeTankDown = 0.85;
-    public static double intakeUp = 0.15;
+    public static double intakeUp = 0.57;
 
     // outtake heights
     // meccanumm heights
@@ -34,7 +34,8 @@ public class ServoConstants {
     public static double outtakePower = 0.5;
 
     // capper servo limits
-    public static double capStep = 0.02;
+    public static double capStep = 0.05;
+    public static double capStepSlow = 0.01;
     public static double capInit = 0;
     public static double capUp = 0;
     public static double capDown = 0.98;

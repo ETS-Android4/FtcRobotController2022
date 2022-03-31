@@ -30,6 +30,8 @@ public class RedAutoV2 extends LinearOpMode {
 
     DcMotorEx intakeExtension, carousel, fleft, fright, bleft, bright, outtake, intakeSurgical;
 
+    public static int intakeExtensionLowerLimit, intakeExtensionUpperLimit;
+
     public SampleMecanumDrive mecanumDrive;
     public SampleTankDrive tankDrive;
 
@@ -112,7 +114,7 @@ public class RedAutoV2 extends LinearOpMode {
                 //.lineToSplineHeading(shippingHubPose)
                 //.lineTo(new Vector2d(shippingHubPose.getX(),shippingHubPose.getY()))
                 //.lineTo(new Vector2d(shippingHubPose.getX(), shippingHubPose.getY()))
-                .back(16)
+                .back(14)
                 .build();
 
         goToTeamCubeFromShippingHub1 = tankDrive.trajectoryBuilder(goToShippingHubFromCarousel2.end())
@@ -120,7 +122,7 @@ public class RedAutoV2 extends LinearOpMode {
                 .build();
 
         goToTeamCubeFromShippingHub2 = tankDrive.trajectoryBuilder(goToTeamCubeFromShippingHub1.end())
-                .forward(30)
+                .forward(25)
                 .build();
 
         goToShippingHub = tankDrive.trajectoryBuilder(goToTeamCubeFromShippingHub2.end())
@@ -249,6 +251,13 @@ public class RedAutoV2 extends LinearOpMode {
         intakePosition.setPosition(intakeUp);
         outtakeServo.setPosition(outtakeServoLowerLimit);
 
+        intakeExtension.setTargetPosition(-60);
+        intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        intakeExtension.setPower(-0.5);
+
+        intakeExtensionLowerLimit = intakeExtension.getCurrentPosition();
+        intakeExtensionUpperLimit = intakeExtensionLowerLimit + 270;
+
 //        OPEN CV
 //        while (!opModeIsActive() && !isStopRequested()) {
 //            telemetry.addData("avg1 - red", pipeline.getAvg1());
@@ -318,8 +327,8 @@ public class RedAutoV2 extends LinearOpMode {
                     break;
                 case MOVE_OUTTAKE_UP:
                     if (!tankDrive.isBusy()) {
-                        intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         intakeExtension.setTargetPosition(100);
+                        intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         intakeExtension.setPower(0.5);
                         if (position == 1) {
                             outtake.setTargetPosition(outtakeFirstLevelPosition);
@@ -351,8 +360,8 @@ public class RedAutoV2 extends LinearOpMode {
 //                            tankDrive.followTrajectory(tankDrive.trajectoryBuilder(PoseStorage.currentPose).back(1).build());
                         } else if (elapsed < 1.8) {
                             outtakeServo.setPosition(outtakeServoLowerLimit);
-                            outtake.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             outtake.setTargetPosition(outtakeFirstLevelPosition);
+                            outtake.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             outtake.setPower(outtakePower);
                         } else {
                             tankDrive.followTrajectoryAsync(goToTeamCubeFromShippingHub1);
@@ -404,7 +413,10 @@ public class RedAutoV2 extends LinearOpMode {
                 case SPIN:
                     if (!tankDrive.isBusy()) {
                         switchFromTankToMec();
-                        mecanumDrive.turn(Math.toRadians(360 * 5));
+                        mecanumDrive.turn(Math.toRadians(-45));
+                        intakeExtension.setTargetPosition(intakeExtensionLowerLimit);
+                        intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        intakeExtension.setPower(-0.5);
                         next(State.IDLE);
                     }
 //                case INTAKE_ALLIANCE:
