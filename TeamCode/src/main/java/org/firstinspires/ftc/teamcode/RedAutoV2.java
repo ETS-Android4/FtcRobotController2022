@@ -114,7 +114,7 @@ public class RedAutoV2 extends LinearOpMode {
                 //.lineToSplineHeading(shippingHubPose)
                 //.lineTo(new Vector2d(shippingHubPose.getX(),shippingHubPose.getY()))
                 //.lineTo(new Vector2d(shippingHubPose.getX(), shippingHubPose.getY()))
-                .back(14)
+                .back(15.5)
                 .build();
 
         goToTeamCubeFromShippingHub1 = tankDrive.trajectoryBuilder(goToShippingHubFromCarousel2.end())
@@ -170,10 +170,10 @@ public class RedAutoV2 extends LinearOpMode {
     }
 
     public void switchFromTankToMec() {
-        fl.setPosition(0.984);
-        fr.setPosition(0.1);
-        br.setPosition(0.955);
-        bl.setPosition(0.01);
+        fl.setPosition(flMec);
+        fr.setPosition(frMec);
+        br.setPosition(brMec);
+        bl.setPosition(blMec);
         isMec = true;
     }
 
@@ -270,6 +270,9 @@ public class RedAutoV2 extends LinearOpMode {
 //            tankDrive.setPoseEstimate(startingPosition);
 //        }
 
+        mecanumDrive.setPoseEstimate(startingPosition);
+        tankDrive.setPoseEstimate(startingPosition);
+
         waitForStart();
         mecanumDrive.turnAsync(Math.toRadians(10));
         next(State.KNOCK_OFF_DUCK);
@@ -313,7 +316,7 @@ public class RedAutoV2 extends LinearOpMode {
                     if (!tankDrive.isBusy()) {
                         switchFromTankToMec();
                         sleep(200);
-                        mecanumDrive.turn(Math.toRadians(120));
+                        mecanumDrive.turn(Math.toRadians(124));
                         switchFromMecToTank();
                         sleep(200);
                         next(State.GO_TO_SHIPPING_HUB_2);
@@ -335,7 +338,8 @@ public class RedAutoV2 extends LinearOpMode {
                         } else if (position == 2) {
                             outtake.setTargetPosition(outtakeSecondLevelPosition);
                         } else {
-                            outtake.setTargetPosition(outtakeThirdLevelPosition);
+                            //outtake.setTargetPosition(outtakeThirdLevelPosition);
+                            outtake.setTargetPosition(-345);
                         }
 
                         outtake.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -348,7 +352,8 @@ public class RedAutoV2 extends LinearOpMode {
                         if (elapsed < 0.2) {
                             switchFromTankToMec();
                             sleep(200);
-                        } else if (elapsed < 0.4) {
+                        } else if (elapsed < 0.7) {
+                            //sleep(500);
                             if (position == 2 || position == 3) {
                                 outtakeServo.setPosition(outtakeServoLimitUpperMidHub);
                             } else {
