@@ -46,7 +46,7 @@ public class RedAutoV2 extends LinearOpMode {
     Trajectory parkWarehouse, goToShippingHubFromCarousel2,  goToShippingHubFromCarousel,
             goToTeamCubeFromShippingHub2, goToTeamCubeFromShippingHub1,
             goToAllianceFreightFromShippingHub2, goToShippingHub,
-            intakeFreight;
+            intakeFreight, driveBack;
 
     Servo fr, br, fl, bl, outtakeServo, intakePosition;
 
@@ -91,7 +91,7 @@ public class RedAutoV2 extends LinearOpMode {
                 //.lineToSplineHeading(shippingHubPose)
                 //.lineTo(new Vector2d(shippingHubPose.getX(),shippingHubPose.getY()))
                 //.lineTo(new Vector2d(shippingHubPose.getX(), shippingHubPose.getY()))
-                .back(16.5)
+                .back(16)
                 .build();
 
         goToTeamCubeFromShippingHub1 = tankDrive.trajectoryBuilder(goToShippingHubFromCarousel2.end())
@@ -108,6 +108,10 @@ public class RedAutoV2 extends LinearOpMode {
 
         intakeFreight = tankDrive.trajectoryBuilder(goToShippingHub.end())
                 .forward(8)
+                .build();
+
+        driveBack = tankDrive.trajectoryBuilder(intakeFreight.end())
+                .back(8)
                 .build();
     }
 
@@ -355,7 +359,7 @@ public class RedAutoV2 extends LinearOpMode {
                     if (!tankDrive.isBusy()) {
                         switchFromTankToMec();
                         sleep(200);
-                        mecanumDrive.turn(Math.toRadians(40));
+                        mecanumDrive.turn(Math.toRadians(36));
                         switchFromMecToTank();
                         sleep(200);
                         next(State.GO_TO_SHIPPING_HUB_PARK_2);
@@ -388,14 +392,16 @@ public class RedAutoV2 extends LinearOpMode {
                             intakeExtension.setTargetPosition(intakeExtensionLowerLimit);
                             intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             intakeExtension.setPower(-0.05);
-                            next(State.IDLE);
+                            next(State.RESET_FOR_TELEOP);
                         }
                     }
                     break;
-//                case RESET_FOR_TELEOP:
-//                    if (!tankDrive.isBusy()) {
-//                        i
-//                    }
+                case RESET_FOR_TELEOP:
+                    if (!tankDrive.isBusy()) {
+                        tankDrive.followTrajectoryAsync(driveBack);
+                        next(State.IDLE);
+                    }
+                    break;
             }
             // Read pose
             Pose2d poseEstimate;
