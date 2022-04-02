@@ -5,10 +5,10 @@ import com.acmerobotics.dashboard.config.Config;
 @Config
 public class ServoConstants {
     // drive train servos
-    public static double frMec = 0.10;
-    public static double flMec = 0.992;
-    public static double brMec = 0.95;
-    public static double blMec = 0.0069;
+    public static double frMec = 0.092; // old: 0.10
+    public static double flMec = 0.999; // old: 0.992
+    public static double brMec = 0.95; // old: 0.95
+    public static double blMec = 0.005; // old: 0.0069
 
     public static double frTank = 1;
     public static double flTank = 0;
