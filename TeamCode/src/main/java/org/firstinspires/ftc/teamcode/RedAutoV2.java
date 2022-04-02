@@ -201,9 +201,9 @@ public class RedAutoV2 extends LinearOpMode {
         intakePosition.setPosition(intakeUp);
         outtakeServo.setPosition(outtakeServoLowerLimit);
 
-        intakeExtension.setTargetPosition(-45);
-        intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        intakeExtension.setPower(-0.05);
+//        intakeExtension.setTargetPosition(-45);
+//        intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        intakeExtension.setPower(-0.05);
 
         intakeExtensionLowerLimit = intakeExtension.getCurrentPosition();
         intakeExtensionUpperLimit = intakeExtensionLowerLimit + 270;
@@ -238,7 +238,7 @@ public class RedAutoV2 extends LinearOpMode {
             switch (currentState) {
                 case KNOCK_OFF_DUCK:
                     if (elapsed < 2.5) {
-                        // should spin for 4 seconds
+                        // should spin for 2.5 seconds
                         carousel.setPower(-0.45);
                         fleft.setPower(-0.1);
                         fright.setPower(-0.1);
@@ -266,7 +266,7 @@ public class RedAutoV2 extends LinearOpMode {
                     if (!tankDrive.isBusy()) {
                         switchFromTankToMec();
                         sleep(200);
-                        mecanumDrive.turn(Math.toRadians(124));
+                        mecanumDrive.turn(Math.toRadians(128));
                         switchFromMecToTank();
                         sleep(200);
                         next(State.GO_TO_SHIPPING_HUB_2);
@@ -289,7 +289,7 @@ public class RedAutoV2 extends LinearOpMode {
                             outtake.setTargetPosition(outtakeSecondLevelPosition);
                         } else {
                             //outtake.setTargetPosition(outtakeThirdLevelPosition);
-                            outtake.setTargetPosition(-345);
+                            outtake.setTargetPosition(-330);
                         }
 
                         outtake.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -385,17 +385,17 @@ public class RedAutoV2 extends LinearOpMode {
                             intakeSurgical.setPower(1);
                         } else {
                             intakeSurgical.setPower(0);
+                            intakeExtension.setTargetPosition(intakeExtensionLowerLimit);
+                            intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            intakeExtension.setPower(-0.05);
+                            next(State.IDLE);
                         }
-                        next(State.RESET_FOR_TELEOP);
                     }
                     break;
-                case RESET_FOR_TELEOP:
-                    if (!tankDrive.isBusy()) {
-                        intakeExtension.setTargetPosition(intakeExtensionLowerLimit);
-                        intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        intakeExtension.setPower(-0.05);
-                        next(State.IDLE);
-                    }
+//                case RESET_FOR_TELEOP:
+//                    if (!tankDrive.isBusy()) {
+//                        i
+//                    }
             }
             // Read pose
             Pose2d poseEstimate;
