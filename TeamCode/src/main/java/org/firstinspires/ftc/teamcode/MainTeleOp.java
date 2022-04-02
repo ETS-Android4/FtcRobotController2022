@@ -240,6 +240,7 @@ public class MainTeleOp extends LinearOpMode {
                     } else {
                         translation = new Vector2d(translation.getY() * 1/2, 0);
                     }
+                    rotation *= 1/2;
                 } else {
                     translation = new Vector2d(-gamepad1.left_stick_y*scaler, 0.0);
                 }

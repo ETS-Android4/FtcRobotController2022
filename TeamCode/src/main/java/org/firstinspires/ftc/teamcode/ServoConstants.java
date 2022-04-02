@@ -16,15 +16,15 @@ public class ServoConstants {
     public static double blTank = 1;
 
     // intake servo limits
-    public static double intakeMecDown = 0.92;
-    public static double intakeTankDown = 0.85;
+    public static double intakeMecDown = 0.095;
+    public static double intakeTankDown = 0.140;
     public static double intakeUp = 0.57;
 
     // outtake heights
     // meccanumm heights
     public static int outtakeFirstLevelPosition = 0;
     public static int outtakeSecondLevelPosition = -120;
-    public static int outtakeThirdLevelPosition = -360;
+    public static int outtakeThirdLevelPosition = -345;
 
     // outtake servo limits
     public static double outtakeServoLowerLimit = 0.24;

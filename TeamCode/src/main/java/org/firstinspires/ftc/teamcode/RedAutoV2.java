@@ -43,13 +43,10 @@ public class RedAutoV2 extends LinearOpMode {
 
     Pose2d startingPosition = new Pose2d(-59, -56, Math.toRadians(67.61986495));
 
-    Trajectory parkWarehouse, goToShippingHubFromCarousel2, goToTeammateItemFromShippingHub,
-            goToShippingHubFromAlliance, goToCarouselFromStarting, goToShippingHubFromCarousel,
-            goToTeamCubeFromShippingHub2, goToAllianceFreightFromShippingHub, goToTeammateItemFromShippingHubPart1,
-            goToTeammateItemFromShippingHubPart2, goToTeammateItemFromShippingHubPart3,
-            goToTeammateItemFromShippingHubPart4, goToFreightFromShippingHub,
-            goToSwitchingPosFromFreight, goToStorageUnitFromSwitchingPos, goToTeamCubeFromShippingHub1,
-            goToAllianceFreightFromShippingHub2, goToShippingHub, shippingHubAll1, shippingHubAll2, park1, park2;
+    Trajectory parkWarehouse, goToShippingHubFromCarousel2,  goToShippingHubFromCarousel,
+            goToTeamCubeFromShippingHub2, goToTeamCubeFromShippingHub1,
+            goToAllianceFreightFromShippingHub2, goToShippingHub,
+            intakeFreight;
 
     Servo fr, br, fl, bl, outtakeServo, intakePosition;
 
@@ -66,30 +63,10 @@ public class RedAutoV2 extends LinearOpMode {
         GO_TO_SHIPPING_HUB,
         GO_TO_SHIPPING_HUB_TURN,
         GO_TO_ALLIANCE_FREIGHT,
-        GO_TO_ALLIANCE_FREIGHT_TURN,
-        SCORE_ALLIANCE_FREIGHT,
-        SCORE_ALLIANCE_FREIGHT_TURN,
-        PICK_UP_TEAMMATE_ITEM_PART_1,
-        PICK_UP_TEAMMATE_ITEM_PART_2,
-        PICK_UP_TEAMMATE_ITEM_PART_3,
-        PICK_UP_TEAMMATE_ITEM_PART_4,
-        PICK_UP_TEAMMATE_ITEM,
-        TRANSITION_SHIPPING_HUB,
         SCORE_FREIGHT_IN_SHIPPING_HUB,
-        TURN_AT_SHIPPING_HUB,
-        SWITCH_TO_TANK,
-        DRIVE_TO_FREIGHT,
-        PICK_UP_FREIGHT,
-        TURN_AT_FREIGHT,
-        GO_TO_SWITCHING_POS,
-        GO_TO_STORAGE_UNIT,
-        OUTTAKE_FREIGHT,
-        GO_TO_SWITCHING_POS_2,
-        DRIVE_TO_FREIGHT_2,
-        PARK_1, PARK_2,
-        INTAKE_ALLIANCE,SPIN,
-        IDLE, GO_TO_SHIPPING_HUB_2, GO_TO_SHIPPING_HUB_TURN_2, TRANSITION_SCORE_FREIGHT_IN_SHIPPING_HUB,
-        SHIPPING_HUB_ALL1, PARK_IN_WAREHOUSE, GO_TO_ALLIANCE_FREIGHT_2, MOVE_OUTTAKE_UP, GO_TO_ALLIANCE_FREIGHT_3, GO_TO_SHIPPING_HUB_PARK, GO_TO_SHIPPING_HUB_PARK_2, SHIPPING_HUB_ALL2
+        SPIN,
+        IDLE, GO_TO_SHIPPING_HUB_2,
+        SHIPPING_HUB_ALL1, PARK_IN_WAREHOUSE, GO_TO_ALLIANCE_FREIGHT_2, MOVE_OUTTAKE_UP, GO_TO_SHIPPING_HUB_PARK, GO_TO_SHIPPING_HUB_PARK_2, INTAKE_FREIGHT, RESET_FOR_TELEOP, SHIPPING_HUB_ALL2
     }
 
     void next(State s) {
@@ -114,7 +91,7 @@ public class RedAutoV2 extends LinearOpMode {
                 //.lineToSplineHeading(shippingHubPose)
                 //.lineTo(new Vector2d(shippingHubPose.getX(),shippingHubPose.getY()))
                 //.lineTo(new Vector2d(shippingHubPose.getX(), shippingHubPose.getY()))
-                .back(15.5)
+                .back(16.5)
                 .build();
 
         goToTeamCubeFromShippingHub1 = tankDrive.trajectoryBuilder(goToShippingHubFromCarousel2.end())
@@ -122,43 +99,16 @@ public class RedAutoV2 extends LinearOpMode {
                 .build();
 
         goToTeamCubeFromShippingHub2 = tankDrive.trajectoryBuilder(goToTeamCubeFromShippingHub1.end())
-                .forward(25)
+                .forward(22)
                 .build();
 
         goToShippingHub = tankDrive.trajectoryBuilder(goToTeamCubeFromShippingHub2.end())
-                .forward(65)
+                .forward(74)
                 .build();
 
-//        parkWarehouse = tankDrive.trajectoryBuilder(goToShippingHubFromCarousel2.end())
-//                .forward(32)
-//                .build();
-//
-//
-//        goToAllianceFreightFromShippingHub = tankDrive.trajectoryBuilder(goToShippingHubFromCarousel2.end())
-//                .forward(6)
-//                .build();
-//
-//        goToAllianceFreightFromShippingHub2 = tankDrive.trajectoryBuilder(goToAllianceFreightFromShippingHub.end().plus(new Pose2d(0, 0, Math.toRadians(114))))
-//                .forward(30)
-//                .build();
-//
-//        shippingHubAll1 = tankDrive.trajectoryBuilder(goToAllianceFreightFromShippingHub2.start())
-//                .back(6)
-//                .build();
-//
-//        shippingHubAll2 = tankDrive.trajectoryBuilder(shippingHubAll1.end().plus(new Pose2d(0, 0, Math.toRadians(-45))))
-//                .back(8)
-//                .build();
-//
-//        park1 = tankDrive.trajectoryBuilder(shippingHubAll2.end())
-//                .forward(6)
-//                .build();
-//
-//        park2 = tankDrive.trajectoryBuilder(park1.end().plus(new Pose2d(0, 0, Math.toRadians(80))))
-//                .forward(72)
-//                .build();
-
-
+        intakeFreight = tankDrive.trajectoryBuilder(goToShippingHub.end())
+                .forward(8)
+                .build();
     }
 
     public void switchFromMecToTank() {
@@ -251,9 +201,9 @@ public class RedAutoV2 extends LinearOpMode {
         intakePosition.setPosition(intakeUp);
         outtakeServo.setPosition(outtakeServoLowerLimit);
 
-        intakeExtension.setTargetPosition(-60);
+        intakeExtension.setTargetPosition(-45);
         intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        intakeExtension.setPower(-0.5);
+        intakeExtension.setPower(-0.05);
 
         intakeExtensionLowerLimit = intakeExtension.getCurrentPosition();
         intakeExtensionUpperLimit = intakeExtensionLowerLimit + 270;
@@ -410,107 +360,44 @@ public class RedAutoV2 extends LinearOpMode {
                         sleep(200);
                         next(State.GO_TO_SHIPPING_HUB_PARK_2);
                     }
+                    break;
                 case GO_TO_SHIPPING_HUB_PARK_2:
                     if (!tankDrive.isBusy()) {
                         tankDrive.followTrajectoryAsync(goToShippingHub);
                         next(State.SPIN);
                     }
+                    break;
                 case SPIN:
                     if (!tankDrive.isBusy()) {
+                        intakePosition.setPosition(intakeTankDown);
                         switchFromTankToMec();
+                        sleep(200);
                         mecanumDrive.turn(Math.toRadians(-45));
-                        intakeExtension.setTargetPosition(intakeExtensionLowerLimit);
-                        intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        intakeExtension.setPower(-0.5);
-                        next(State.IDLE);
-                    }
-//                case INTAKE_ALLIANCE:
-//                    if (!tankDrive.isBusy()){
-//                        switchFromTankToMec();
-//                        sleep(200);
-//                        intakePosition.setPosition(intakeMecDown);
-//                        sleep(200);
-//                        intakeSurgical.setPower(0.6);
-//                        intakeExtension.setTargetPosition(intakeExtension.getCurrentPosition()-180);
-//                        intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                        intakeExtension.setPower(0.2);
-//                        sleep(1000);
-//                        mecanumDrive.turn(Math.toRadians(15));
-//                        mecanumDrive.turn(Math.toRadians(-15));
-//                        intakePosition.setPosition(intakeUp);
-//                        intakeExtension.setTargetPosition(intakeExtension.getCurrentPosition()+180);
-//                        intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                        intakeExtension.setPower(0.2);
-//                        sleep(1000);
-//                        intakeSurgical.setPower(-0.6);
-//                        sleep(1000);
-//                        switchFromMecToTank();
-//                        sleep(200);
-//                        tankDrive.followTrajectoryAsync(shippingHubAll1);
-//                        next(State.SHIPPING_HUB_ALL1);
-//                    }
-
-//                case SHIPPING_HUB_ALL1:
-//                    if (!tankDrive.isBusy()) {
-//                        switchFromTankToMec();
-//                        sleep(200);;
-//                        intakeSurgical.setPower(0);
-//                        mecanumDrive.turn(Math.toRadians(-45));
-//                        switchFromMecToTank();
-//                        sleep(200);;
-//                        if (position == 1) {
-//                            outtake.setTargetPosition(outtakeFirstLevelPosition);
-//                        } else if (position == 2) {
-//                            outtake.setTargetPosition(outtakeSecondLevelPosition);
-//                        } else {
-//                            outtake.setTargetPosition(outtakeThirdLevelPosition);
-//                        }
-//                        outtake.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                        outtake.setPower(outtakePower);
-//                        tankDrive.followTrajectoryAsync(shippingHubAll2);
-//                        next(State.SCORE_ALLIANCE_FREIGHT);
-//                    }
-//                    break;
-
-//                case SCORE_ALLIANCE_FREIGHT:
-//                    if (!tankDrive.isBusy()) {
-//                        if (elapsed < 0.8) {
-//                            switchFromTankToMec();
-//                        } else if (elapsed < 1) {
-//                            outtakeServo.setPosition(outtakeServoOpenPosition);
-//                            telemetry.addData("outtake servo position: ", outtakeServo.getPosition());
-//                        } else if (elapsed < 1.6) {
-//                            // TODO switch
-//                            tankDrive.followTrajectory(tankDrive.trajectoryBuilder(PoseStorage.currentPose).back(1).build());
-//                        } else if (elapsed < 2.3) {
-//                            outtakeServo.setPosition(outtakeServoClosePosition);
-//                            outtake.setTargetPosition(outtakeDownPosition);
-//                            outtake.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                            outtake.setPower(outtakePower);
-//                        } else {
-////                            mecanumDrive.turnAsync(Math.toRadians(-90));
-//                            tankDrive.followTrajectoryAsync(park1);
-//                            next(State.PARK_1);
-//                        }
-//                    }
-//                    break;
-/*                case PARK_1:
-                    if (!tankDrive.isBusy()) {
-                        switchFromTankToMec();
-                        sleep(200);;
-                        mecanumDrive.turnAsync(Math.toRadians(90));
-                        next(State.PARK_2);
+                        switchFromMecToTank();
+                        sleep(200);
+                        next(State.INTAKE_FREIGHT);
                     }
                     break;
-                case PARK_2:
-                    if (!mecanumDrive.isBusy()) {
-                        switchFromMecToTank();
-                        tankDrive.followTrajectoryAsync(park2);
+                case INTAKE_FREIGHT:
+                    if (!tankDrive.isBusy()) {
+                        tankDrive.followTrajectoryAsync(intakeFreight);
+                        if (elapsed < 2.5) {
+                            intakeSurgical.setPower(1);
+                        } else {
+                            intakeSurgical.setPower(0);
+                        }
+                        next(State.RESET_FOR_TELEOP);
+                    }
+                    break;
+                case RESET_FOR_TELEOP:
+                    if (!tankDrive.isBusy()) {
+                        intakeExtension.setTargetPosition(intakeExtensionLowerLimit);
+                        intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        intakeExtension.setPower(-0.05);
                         next(State.IDLE);
-                    }*/
+                    }
             }
             // Read pose
-
             Pose2d poseEstimate;
             if (isMec) {
                 poseEstimate = mecanumDrive.getPoseEstimate();
