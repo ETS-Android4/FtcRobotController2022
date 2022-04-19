@@ -1,16 +1,24 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import static org.firstinspires.ftc.teamcode.Constants.*;
+
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.drive.SampleTankDrive;
 
 @Config
 public class DriveTrain {
 
     public DcMotorEx fleft, fright, bleft, bright;
     public Servo fr, br, fl, bl;
+
+    SampleMecanumDrive mecDrive;
+    SampleTankDrive tankDrive;
+
 
     public DriveTrain(HardwareMap hardwareMap) {
         // drive train servo init
@@ -24,6 +32,13 @@ public class DriveTrain {
         fright = hardwareMap.get(DcMotorEx.class, "front_right");
         bleft = hardwareMap.get(DcMotorEx.class, "rear_left");
         bright = hardwareMap.get(DcMotorEx.class, "rear_right");
+
+        // roadrunner drive trains
+        mecDrive = new SampleMecanumDrive(hardwareMap);
+        tankDrive = new SampleTankDrive(hardwareMap);
+
+        mecDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        tankDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public void mecToTank() {
