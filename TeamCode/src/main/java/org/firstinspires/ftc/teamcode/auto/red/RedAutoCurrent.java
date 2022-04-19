@@ -1,6 +1,6 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.auto.red;
 
-import static org.firstinspires.ftc.teamcode.ServoConstants.*;
+import static org.firstinspires.ftc.teamcode.Constants.*;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -14,9 +14,11 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.CVPipeline;
 import org.firstinspires.ftc.teamcode.drive.PoseStorage;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.SampleTankDrive;
+import org.firstinspires.ftc.teamcode.subsystems.DriveTrain;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -24,7 +26,9 @@ import org.openftc.easyopencv.OpenCvWebcam;
 
 @Config
 @Autonomous(name = "RedAutoV2")
-public class RedAutoV2 extends LinearOpMode {
+public class RedAutoCurrent extends LinearOpMode {
+    DriveTrain driveTrain = new DriveTrain(hardwareMap);
+
     OpenCvWebcam webcam;
     CVPipeline pipeline;
 
@@ -244,10 +248,7 @@ public class RedAutoV2 extends LinearOpMode {
                     if (elapsed < 2.5) {
                         // should spin for 2.5 seconds
                         carousel.setPower(-0.45);
-                        fleft.setPower(-0.1);
-                        fright.setPower(-0.1);
-                        bleft.setPower(-0.1);
-                        bright.setPower(-0.1);
+                        driveTrain.duckTension();
                     } else {
                         carousel.setPower(0.0);
                         fleft.setPower(0.0);

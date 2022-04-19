@@ -1,13 +1,11 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.teleop;
 
-import static org.firstinspires.ftc.teamcode.ServoConstants.*;
-import static org.firstinspires.ftc.teamcode.ServoConstants.outtakeFirstLevelPosition;
-import static org.firstinspires.ftc.teamcode.ServoConstants.outtakePower;
-import static org.firstinspires.ftc.teamcode.ServoConstants.outtakeThirdLevelPosition;
+import static org.firstinspires.ftc.teamcode.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.acmerobotics.roadrunner.drive.Drive;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.arcrobotics.ftclib.gamepad.ButtonReader;
@@ -23,10 +21,13 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.drive.PoseStorage;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.SampleTankDrive;
+import org.firstinspires.ftc.teamcode.subsystems.*;
 
 @TeleOp(name = "TeleOp")
 @Config
 public class MainTeleOp extends LinearOpMode {
+    DriveTrain driveTrain = new DriveTrain(hardwareMap);
+
 
     // defining motors and servos
     DcMotorEx intakeSurgical, intakeExtension, outtake, motorExLeft, carousel,
@@ -290,10 +291,7 @@ public class MainTeleOp extends LinearOpMode {
 
             boolean noCarousel = true;
             if (gamepad2.x || gamepad2.b) {
-                fleft.setPower(-0.07);
-                fright.setPower(-0.07);
-                bleft.setPower(-0.07);
-                bright.setPower(-0.07);
+                driveTrain.duckTension();
             }
 
             if (gamepad2.x) {
@@ -436,20 +434,14 @@ public class MainTeleOp extends LinearOpMode {
                     if(intakePosition.getPosition() > mecDown - 0.01 && intakePosition.getPosition() < mecDown + 0.01){
                         intakePosition.setPosition(tankDown);
                     }
-                    fr.setPosition(frTank);
-                    br.setPosition(brTank);
-                    fl.setPosition(flTank);
-                    bl.setPosition(blTank);
+                    driveTrain.mecToTank();
 
                     isMec=false;
 
                 }else{
                     // switching from tank to mec
 
-                    fl.setPosition(flMec);
-                    fr.setPosition(frMec);
-                    br.setPosition(brMec);
-                    bl.setPosition(blMec);
+                    driveTrain.tankToMec();
 
                     sleep(200); // delay 200 milliseconds so no intake slamming upon switch
 

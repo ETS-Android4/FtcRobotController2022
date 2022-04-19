@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode.auto.blue;
 
-import static org.firstinspires.ftc.teamcode.ServoConstants.outtakeFirstLevelPosition;
-import static org.firstinspires.ftc.teamcode.ServoConstants.outtakeSecondLevelPosition;
-import static org.firstinspires.ftc.teamcode.ServoConstants.outtakeThirdLevelPosition;
+import static org.firstinspires.ftc.teamcode.Constants.outtakeFirstLevelPosition;
+import static org.firstinspires.ftc.teamcode.Constants.outtakeSecondLevelPosition;
+import static org.firstinspires.ftc.teamcode.Constants.outtakeThirdLevelPosition;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
