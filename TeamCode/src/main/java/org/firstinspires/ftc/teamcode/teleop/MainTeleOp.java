@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import static org.firstinspires.ftc.teamcode.ServoConstants.*;
+import static org.firstinspires.ftc.teamcode.ServoConstants.outtakeFirstLevelPosition;
+import static org.firstinspires.ftc.teamcode.ServoConstants.outtakePower;
+import static org.firstinspires.ftc.teamcode.ServoConstants.outtakeThirdLevelPosition;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -21,40 +24,45 @@ import org.firstinspires.ftc.teamcode.drive.PoseStorage;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.SampleTankDrive;
 
-@TeleOp(name = "OutreachTeleOp")
+@TeleOp(name = "TeleOp")
 @Config
-public class OutreachTeleOp extends LinearOpMode {
+public class MainTeleOp extends LinearOpMode {
 
+    // defining motors and servos
     DcMotorEx intakeSurgical, intakeExtension, outtake, motorExLeft, carousel,
             fleft, fright, bleft, bright;
-    Servo intakePosition, outtakeServo, fr, br, fl, bl;
+    Servo intakePosition, outtakeServo, fr, br, fl, bl, capperServo;
 
-    double mecDown = 0.92;
-    double intakeUp = 0.15;
-    double tankDown = 0.85;
+    // intake constants
+    double mecDown = 0.095;
+    double intakeUp = 0.57;
+    double tankDown = 0.140;
 
+    // outtake constants
+    double outtakeDelay = 0.2;
     public static int outtakeThirdLevelPosition = -360;
     public static int outtakeFirstLevelPosition = -120;
     public static int outtakeDownPosition = 0;
     public static double outtakePower = 0.5;
-    public static double outtakeServoClosePosition = 0.2;
-    public static double outtakeServoOpenPosition = 0.7;
 
-    public static int intakeExtensionLowerLimit = -30;
-    public static int intakeExtensionUpperLimit = 270;
-    public static double intakePower = 0.6;
+    // public static double outtakeServoClosePosition = 0.2;
+    // public static double outtakeServoOpenPosition = 0.7;
+
+    public static int intakeExtensionLowerLimit, intakeExtensionUpperLimit;
+    //public static = 270;
+    //public static double intakePower = 0.6;
 
     public static double leftStickPos = 1;
 
-    public static double DPAD_SPEED = 0.35;
-    public static double BUMPER_ROTATION_SPEED = .7 * .5;
-    public static double ROTATION_MULTIPLIER = .7 * .5;
+    public static double DPAD_SPEED = 0.18;
+    public static double BUMPER_ROTATION_SPEED = .7;
+    public static double ROTATION_MULTIPLIER = .7;
 
     public static double TICKS_PER_REV = 537.6;
 
     public static boolean isMec = true;
     ElapsedTime runtime = new ElapsedTime();
-
+    public double timer = -1;
     @Override
     public void runOpMode() throws InterruptedException {
         double lastvaluefront = -1;
@@ -73,17 +81,24 @@ public class OutreachTeleOp extends LinearOpMode {
         SampleTankDrive tankDrive = new SampleTankDrive(hardwareMap);
         tankDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        // defining gamepads
         GamepadEx gp1 = new GamepadEx(gamepad1);
         GamepadEx gp2 = new GamepadEx(gamepad2);
 
         ButtonReader redCarousel = new ButtonReader(gp2, GamepadKeys.Button.B);
         ButtonReader blueCarousel = new ButtonReader(gp2, GamepadKeys.Button.X);
 
+        ButtonReader capperDown = new ButtonReader(gp2, GamepadKeys.Button.A);
+        ButtonReader capperUp = new ButtonReader(gp2, GamepadKeys.Button.Y);
+
         fl = hardwareMap.get(Servo.class, "frontleft"); // lower: 0.984, upper: 0
         fr = hardwareMap.get(Servo.class, "frontright"); // lower: .1, upper: 1
         br = hardwareMap.get(Servo.class, "backright"); // lower: 0.954, upper: 0
         bl = hardwareMap.get(Servo.class, "backleft"); // lower: 0.02, upper: 1
 
+        capperServo = hardwareMap.get(Servo.class, "capperServo"); // registered in driver station
+
+        // drivetrain motor init
         fleft = hardwareMap.get(DcMotorEx.class, "front_left");
         fright = hardwareMap.get(DcMotorEx.class, "front_right");
         bleft = hardwareMap.get(DcMotorEx.class, "rear_left");
@@ -92,7 +107,6 @@ public class OutreachTeleOp extends LinearOpMode {
         motorExLeft = (DcMotorEx)hardwareMap.get(DcMotor.class, "intake");
         outtakeServo = hardwareMap.get(Servo.class, "outtake servo");
         outtakeServo.setDirection(Servo.Direction.FORWARD);
-
 
         intakeSurgical = hardwareMap.get(DcMotorEx.class, "intakeSurgical");
         intakeSurgical.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -120,11 +134,16 @@ public class OutreachTeleOp extends LinearOpMode {
         telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
 
         // init robot
+        intakeExtension.setTargetPosition(-60);
+        intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        intakeExtension.setPower(-0.5);
+
         intakeExtensionLowerLimit = intakeExtension.getCurrentPosition();
         intakeExtensionUpperLimit = intakeExtensionLowerLimit + 270;
+
         intakePosition.setPosition(intakeUp);
         motorExLeft.setTargetPosition(outtakeDownPosition);
-        outtakeServo.setPosition(outtakeServoClosePosition);
+        outtakeServo.setPosition(outtakeServoLowerLimit);
 
         double scaler = 0.6;
 
@@ -143,6 +162,8 @@ public class OutreachTeleOp extends LinearOpMode {
 
         waitForStart();
 
+        capperServo.setPosition(capInit);
+
         while (!isStopRequested()) {
             double elapsed = runtime.seconds() - time;
 
@@ -160,17 +181,24 @@ public class OutreachTeleOp extends LinearOpMode {
             telemetry.addData("x", poseEstimate.getX());
             telemetry.addData("y", poseEstimate.getY());
             telemetry.addData("heading", poseEstimate.getHeading());
-            telemetry.addData("scaler", scaler);
-            telemetry.addData("intake servo position: ", intakePosition.getPosition());
-            telemetry.addData("outtakePosition: ", outtake.getCurrentPosition());
+            telemetry.addData("ie lower limit:", intakeExtensionLowerLimit);
+            telemetry.addData("ie upper limit:", intakeExtensionUpperLimit);
+//            telemetry.addData("scaler", scaler);
+//            telemetry.addData("intake servo position: ", intakePosition.getPosition());
+//            telemetry.addData("outtakePosition: ", outtake.getCurrentPosition());
             //telemetry.addData("upper limit: ", intakeExtensionUpperLimit);
             //telemetry.addData("lower limit: ", intakeExtensionLowerLimit);
 
             redCarousel.readValue();
             blueCarousel.readValue();
 
+            capperDown.readValue();
+            capperUp.readValue();
+
             Vector2d translation = new Vector2d(-gamepad1.left_stick_y*scaler, -gamepad1.left_stick_x*scaler);
             double rotation = -ROTATION_MULTIPLIER * gamepad1.right_stick_x * scaler;
+
+            // Gamepad 1
 
             // slow translation with dpad
             if (gamepad1.dpad_up) {
@@ -183,6 +211,18 @@ public class OutreachTeleOp extends LinearOpMode {
                 translation = new Vector2d(0, -DPAD_SPEED);
             }
 
+            // making speed slower when left trigger is pressed
+            // tank mode should only have value != 0 in x component
+            if (gamepad1.left_trigger > 0) {
+                if (translation.getX() != 0) {
+                    translation = new Vector2d(translation.getX() * 1/2, 0);
+                } else {
+                     translation = new Vector2d(0, translation.getY() * 1/2);
+                }
+            }
+
+            //telemetry.addData("left trigger: ", gamepad1.left_trigger);
+
             // slow rotation with bumpers
             if (gamepad1.left_bumper) {
                 rotation = BUMPER_ROTATION_SPEED;
@@ -193,8 +233,43 @@ public class OutreachTeleOp extends LinearOpMode {
             if (isMec) {
                 mecDrive.setWeightedDrivePower(new Pose2d(translation, rotation));
             } else {
-                translation = new Vector2d(-gamepad1.left_stick_y*scaler, 0.0);
+                // y in tank should always be 0!
+                if (gamepad1.left_trigger > 0) {
+                    if (translation.getX() != 0) {
+                        translation = new Vector2d(translation.getX() * 1/2, 0);
+                    } else {
+                        translation = new Vector2d(translation.getY() * 1/2, 0);
+                    }
+                    rotation *= 1/2;
+                } else {
+                    translation = new Vector2d(-gamepad1.left_stick_y*scaler, 0.0);
+                }
                 tankDrive.setWeightedDrivePower(new Pose2d(translation, rotation));
+            }
+
+            // capper
+            if (gamepad2.a) {
+                // capper down
+                if (capperServo.getPosition() + capStep < capDown) {
+                    capperServo.setPosition(capperServo.getPosition() + capStep);
+                }
+            } else if (gamepad2.y) {
+                // capper up
+                if (capperServo.getPosition() - capStep > capInit) {
+                    capperServo.setPosition(capperServo.getPosition() - capStep);
+                }
+            }
+
+            if (gamepad2.right_bumper) {
+                // cap servo pos increases slowly
+                if (capperServo.getPosition() + capStep < capDown) {
+                    capperServo.setPosition(capperServo.getPosition() + capStepSlow);
+                }
+            } else if (gamepad2.left_bumper) {
+                // cap servo pos decreases slowly
+                if (capperServo.getPosition() - capStep > capInit) {
+                    capperServo.setPosition(capperServo.getPosition() - capStepSlow);
+                }
             }
 
             // carousel
@@ -223,10 +298,10 @@ public class OutreachTeleOp extends LinearOpMode {
 
             if (gamepad2.x) {
                 noCarousel = false;
-                if (runtime.seconds() - lastX < 1.5) {
-                    carousel.setPower(0.1);
-                } else {
+                if (runtime.seconds() - lastX < 1.25) {
                     carousel.setPower(1);
+                } else {
+                    carousel.setPower(0.5);
                 }
             } else {
                 lastX = runtime.seconds();
@@ -234,8 +309,8 @@ public class OutreachTeleOp extends LinearOpMode {
 
             if (gamepad2.b) {
                 noCarousel = false;
-                if (runtime.seconds() - lastB < 1.5) {
-                    carousel.setPower(-1);
+                if (runtime.seconds() - lastB < 1.25) {
+                    carousel.setPower(-0.5);
                 } else {
                     carousel.setPower(-1);
                 }
@@ -245,32 +320,7 @@ public class OutreachTeleOp extends LinearOpMode {
 
             if (noCarousel) carousel.setPower(0);
 
-//            double state = 0;
-//            if(gamepad2.x){
-//                state=Math.min(1,state+1);
-//            }
-//            if(gamepad2.b){
-//                state=Math.max(-1,state-1);
-//            }
-//
-//            if (elapsed < 1.5) {
-//                carousel.setPower(0.8 * state);
-//            } else {
-//                carousel.setPower(1 * state);
-//            }
-//            if (redCarousel.isDown()) {
-//                carousel.setPower(-1);
-//            } else {
-//                carousel.setPower(0.0);
-//            }
-//
-//            if (blueCarousel.isDown()) {
-//                carousel.setPower(1);
-//            } else {
-//                carousel.setPower(0.0);
-//            }
-
-            telemetry.addData("red carousel down: ", redCarousel.isDown());
+            //telemetry.addData("red carousel down: ", redCarousel.isDown());
 
             // surgical tubing
             if (gamepad2.right_trigger < 0.5 && gamepad2.left_trigger < 0.5) {
@@ -311,182 +361,110 @@ public class OutreachTeleOp extends LinearOpMode {
 
 
             // intake extension motor
-            if (gamepad2.left_stick_y < -0.02 || extended) {
+            if (gamepad2.left_stick_y < -0.02) {
                 double joystickPosition = gamepad2.left_stick_y;
-                telemetry.addData("curr pos: ", intakeExtension.getCurrentPosition());
-                telemetry.addData("statement: ", intakeExtension.getCurrentPosition() > intakeExtensionLowerLimit);
-                if (intakeExtension.getCurrentPosition() > -30) {
+//                telemetry.addData("curr pos: ", intakeExtension.getCurrentPosition());
+//                telemetry.addData("statement: ", intakeExtension.getCurrentPosition() > intakeExtensionLowerLimit);
+
+                if (intakeExtension.getCurrentPosition() >= intakeExtensionLowerLimit) {
+                    //telemetry.addData("pos to move: ", (intakeExtensionLowerLimit + joystickPosition * 270 * (-1)));
 //                    telemetry.addData("statement: ", gamepad2.left_stick_y < -0.1);
 //                    telemetry.addData("pos: ", (int) (joystickPosition * 270 * (-1)));
 //
-
-                    intakeExtension.setTargetPosition((int) (joystickPosition * 270 * (-1)));
+                    //telemetry.addData("test", 0);
+                    intakeExtension.setTargetPosition((int) (intakeExtensionLowerLimit + joystickPosition * 270 * (-1)));
                     intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    intakeExtension.setPower(0.5);
+                    intakeExtension.setPower(0.7);
                 }
-                extended = true;
-            } else if (gamepad2.left_stick_y > 0.1 || !extended) {
-                intakeExtension.setTargetPosition(0);
-                intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                intakeExtension.setPower(-0.4);
-                extended = false;
+                //extended = true;
             }
 
-            telemetry.addData("joystick: ", gamepad2.left_stick_y);
-            telemetry.addData("intake extension pos: ", intakeExtension.getCurrentPosition());
-            telemetry.addData("extended: ", extended);
+            if (gamepad2.left_stick_y >= 0) { // what code makes left_stick_y > 0.02 go in then?
+                intakeExtension.setTargetPosition(intakeExtensionLowerLimit);
+                intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                intakeExtension.setPower(-0.5);
+                //extended = false;
+            }
 
-//            if(!gamepad2.dpad_left&&!gamepad2.dpad_up&&!gamepad2.dpad_down&&!gamepad2.dpad_right){
-//                if (gamepad2.left_stick_y > 0.1) {
-//                    if(lastvaluefront==-1){
-//                        startpoint = (int) intakeExtensionUpperLimit;
-//                    }else if(getRuntime()-lastvaluefront>0.1){
-//                        startpoint=intakeExtension.getCurrentPosition();
-//                    }
-//                    lastvaluefront=getRuntime();
-//                    int pos =  intakeExtension.getCurrentPosition();
-//                    pos = startpoint-pos;
-//                    pos = startpoint+(int)intakeExtensionLowerLimit-pos;
-//                    double dist = Math.abs(startpoint-intakeExtensionLowerLimit);
-//                    double function = Math.max((0.12 * (Math.sin((Math.PI / dist) * pos) * Math.exp(Math.PI * pos / dist))), 0.2);
-//                    if(function>1.5){
-//                        function=0.1;
-//                    }
-//                    // intake should come back up
-//                    if (intakeExtension.getCurrentPosition() >= intakeExtensionLowerLimit) {
-//                        power = 1/1.7 *(gamepad2.left_stick_y * (function));
-//                        intakeExtension.setTargetPosition((int) intakeExtensionLowerLimit);
-//                        intakeExtension.setPower(-(power+0.2));
-//                    } else {
-//                        intakeExtension.setPower(0.0);
-//                    }
-//                } else if (gamepad2.left_stick_y < -0.1) {
-//
-//                    if(lastvaluelast==-1){
-//                        startpoint = (int) intakeExtensionLowerLimit;
-//                    }else if(getRuntime()-lastvaluelast>0.1){
-//                        startpoint=intakeExtension.getCurrentPosition();
-//
-//                    }
-//                    lastvaluelast=getRuntime();
-//                    int pos =intakeExtension.getCurrentPosition();
-//                    pos = pos-startpoint;
-//
-//                    pos=startpoint+(int)intakeExtensionUpperLimit-pos;
-//
-//                    double dist = Math.abs(startpoint-intakeExtensionUpperLimit);
-//                    double function = Math.max((0.12 * (Math.sin((Math.PI / dist) * pos) * Math.exp(Math.PI * pos / dist))), 0.2);
-//                    if(function>1.01){
-//                        function=0.1;
-//                    }
-//                    // intake extends
-//
-//                    if (intakeExtension.getCurrentPosition() <= intakeExtensionUpperLimit) {
-//                        power = 1/1.7* (gamepad2.left_stick_y * (function));
-//                        intakeExtension.setPower(-(power+0.1));
-//                    } else {
-//                        intakeExtension.setPower(0.0);
-//                    }
-//                } else {
-//                    if(Math.abs(intakeExtension.getCurrentPosition()-intakeExtensionLowerLimit)<30.0){
-//                        intakeExtension.setPower(-(0.2+0.1));
-//                    }else{
-//                        if(motorExLeft.getCurrentPosition()==outtakeDownPosition) {
-//                            intakeExtension.setPower(-(0.2+0.1));
-//                        }else{
-//                            intakeExtension.setPower(0.0);
-//                        }
-//                    }
-//
-//                }
-//            }else{
-//
-//
-//            }
+            if (intakeExtension.getCurrentPosition() >= intakeExtensionLowerLimit && intakeExtension.getCurrentPosition() <= intakeExtensionLowerLimit + 20) {
+                if (gamepad2.left_stick_y > -0.02 && gamepad2.left_stick_y < 0.02) {
+                    //telemetry.addLine("pulling back");
+                    intakeExtension.setTargetPosition(intakeExtensionLowerLimit);
+                    intakeExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    intakeExtension.setPower(-0.001);
+                }
+            }
+
+            //telemetry.addData("joystick: ", gamepad2.left_stick_y);
+            //telemetry.addData("intake extension pos: ", intakeExtension.getCurrentPosition());
+//          telemetry.addData("extended: ", extended);
 
             // outtake
+
             if (gamepad2.dpad_up) {
-                if(intakeExtension.getCurrentPosition()-intakeExtensionLowerLimit<100){
-                    intakeExtension.setPower(0.2);
-                }
                 motorExLeft.setTargetPosition(outtakeThirdLevelPosition);
                 motorExLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 motorExLeft.setPower(outtakePower);
             }
 
             if (gamepad2.dpad_left) {
-                if(intakeExtension.getCurrentPosition()-intakeExtensionLowerLimit<100){
-                    intakeExtension.setPower(0.2);
-                }
                 motorExLeft.setTargetPosition(outtakeFirstLevelPosition);
                 motorExLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 motorExLeft.setPower(outtakePower);
             }
 
-//            // FIX THIS
-//            if (gamepad2.y) {
-//                if (outtake.getCurrentPosition() < outtakeThirdLevelPosition && outtake.getCurrentPosition() > -5) {
-//                    telemetry.addLine("raising manually");
-//                    outtake.setPower(0.2);
-//                }
-//            }
-//
-//            if (gamepad2.a) {
-//                if (outtake.getCurrentPosition() < outtakeThirdLevelPosition && outtake.getCurrentPosition() > -5) {                    telemetry.addLine("raising manually");
-//                    telemetry.addLine("lowering manually");
-//                    outtake.setPower(-0.2);
-//                }
-//            }
-
             if (gamepad2.dpad_right) {
-                if(intakeExtension.getCurrentPosition()-intakeExtensionLowerLimit<100){
-                    intakeExtension.setPower(0.2);
-                }
-                outtakeServo.setPosition(outtakeServoOpenPosition);
+//                if(intakeExtension.getCurrentPosition()-intakeExtensionLowerLimit<100){
+//                    intakeExtension.setPower(0.2);
+//                }
+
+                outtakeServo.setPosition(outtakeServoLimitUpperMidHub);
             }
 
             if (gamepad2.dpad_down) {
-                if(intakeExtension.getCurrentPosition()-intakeExtensionLowerLimit<100){
-                    intakeExtension.setPower(0.2);
-                }
-
                 motorExLeft.setTargetPosition(outtakeDownPosition);
                 motorExLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                motorExLeft.setPower(outtakePower);
+                motorExLeft.setPower(outtakePower*0.6);
 
-                outtakeServo.setPosition(outtakeServoClosePosition);
+                outtakeServo.setPosition(outtakeServoLowerLimit);
             }
-//            telemetry.addData("intake Position: ", intakePosition.getPosition());
-//            if(gamepad1.right_trigger>0.6&&pressed){
-//                if(isMec){
-//                    // switcing from mec to tank
-//                    if(intakePosition.getPosition() > mecDown - 0.01 && intakePosition.getPosition() < mecDown + 0.01){
-//                        intakePosition.setPosition(tankDown);
-//                    }
-//                    fr.setPosition(frTank);
-//                    br.setPosition(brTank);
-//                    fl.setPosition(flTank);
-//                    bl.setPosition(blTank);
-//
-//                    isMec=false;
-//
-//                }else{
-//                    // switching from tank to mec
-//                    if(intakePosition.getPosition() > tankDown - 0.01 && intakePosition.getPosition() < tankDown + 0.01){
-//                        intakePosition.setPosition(mecDown);
-//                    }
-//                    fl.setPosition(flMec);
-//                    fr.setPosition(frMec);
-//                    br.setPosition(brMec);
-//                    bl.setPosition(blMec);
-//                    isMec=true;
-//
-//                }
-//                pressed=false;
-//            }
-//            if(gamepad1.right_trigger<0.6){
-//                pressed=true;
-//            }
+            //telemetry.addData("intake Position: ", intakePosition.getPosition());
+
+            if(gamepad1.right_trigger>0.6&&pressed){
+                if(isMec){
+                    // switcing from mec to tank
+                    if(intakePosition.getPosition() > mecDown - 0.01 && intakePosition.getPosition() < mecDown + 0.01){
+                        intakePosition.setPosition(tankDown);
+                    }
+                    fr.setPosition(frTank);
+                    br.setPosition(brTank);
+                    fl.setPosition(flTank);
+                    bl.setPosition(blTank);
+
+                    isMec=false;
+
+                }else{
+                    // switching from tank to mec
+
+                    fl.setPosition(flMec);
+                    fr.setPosition(frMec);
+                    br.setPosition(brMec);
+                    bl.setPosition(blMec);
+
+                    sleep(200); // delay 200 milliseconds so no intake slamming upon switch
+
+                    if(intakePosition.getPosition() > tankDown - 0.01 && intakePosition.getPosition() < tankDown + 0.01){
+                        intakePosition.setPosition(mecDown);
+                    }
+
+                    isMec=true;
+
+                }
+                pressed=false;
+            }
+            if(gamepad1.right_trigger<0.6){
+                pressed=true;
+            }
 
             if (gamepad1.a&&a) {
                 scaler=Math.max(0.2, scaler-0.2);
