@@ -46,4 +46,8 @@ public class DriveTrain {
         bleft.setPower(duckTension);
         bright.setPower(duckTension);
     }
+
+    public void driveTrainInit() {
+        tankToMec();
+    }
 }
